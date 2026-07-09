@@ -335,31 +335,26 @@ agent 写 skill
 8. `skills/skill2-audit`
 9. `skills/skill2-prune`
 
-## 当前 repo 需要调整
+## 当前 repo 状态
 
-当前 repo 仍偏 CLI-first。下一步应改成 skills-first：
+已转向 skills-first，正式分发源在：
 
 ```text
-.agents/skills/isolated-skill-test/SKILL.md
+skills/
 ```
 
-迁到：
+已建立：
 
 ```text
 skills/skill2-test/SKILL.md
-```
-
-再补：
-
-```text
 skills/skill2-build/SKILL.md
 skills/skill2-package/SKILL.md
 skills/skill2-audit/SKILL.md
 skills/skill2-prune/SKILL.md
 ```
 
-README 也要改成：
+下一步：
 
 ```text
-Skill2 is a skill pack plus optional CLI for building, testing, packaging, auditing, and pruning agent skills inside your own repos.
+实现 skill2 scaffold / lint / test 的最小 CLI。
 ```

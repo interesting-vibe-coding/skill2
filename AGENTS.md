@@ -15,6 +15,7 @@ Start with:
 - `README.md`
 - `docs/MVP.md`
 - `docs/PRODUCT_DIRECTION.md`
+- `docs/SKILL_REPO_REFERENCES.md`
 - `docs/ARCHITECTURE.md`
 - `docs/PRIOR_ART.md`
 
@@ -57,10 +58,14 @@ search-strategy + smart-fetch + internet-reach -> agent-search references
 
 ## Skill Test Protocol
 
-Project skill:
+Project skills:
 
 ```text
-.agents/skills/isolated-skill-test/SKILL.md
+skills/skill2-test/SKILL.md
+skills/skill2-build/SKILL.md
+skills/skill2-package/SKILL.md
+skills/skill2-audit/SKILL.md
+skills/skill2-prune/SKILL.md
 ```
 
-Use it before implementing `skill2 test`.
+Use `skill2-test` before implementing `skill2 test`.

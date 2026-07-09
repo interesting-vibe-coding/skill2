@@ -2,9 +2,9 @@
 
 Skills for your skills.
 
-Skill2 is a local toolkit for maintaining agent skill libraries: lint the files, measure real usage, visualize hot and cold skills, and suggest what to keep, merge, downgrade, or delete.
+Skill2 is a skill pack plus optional CLI for building, testing, packaging, auditing, and pruning agent skills inside your own repos.
 
-Direction: Skill2 is skills-first. CLI is scaffolding and deterministic checks used by those skills.
+Skills are the product surface. CLI is scaffolding and deterministic checks used by those skills.
 
 [中文](README.zh.md)
 
@@ -22,6 +22,28 @@ Agent skills are becoming package-like. They need the same maintenance loop as c
 - pruning: delete, merge, downgrade to reference, or move to project-level scope
 
 Most existing tools stop at validation. Skill2 aims at library governance.
+
+## Install
+
+```bash
+git clone https://github.com/MisterBrookT/skill2.git
+cd skill2
+./install.sh codex
+```
+
+Manual repo-local install:
+
+```bash
+cp -R skills/skill2-* /path/to/repo/.agents/skills/
+```
+
+## Skill Pack
+
+- `skill2-build`: create or improve a skill.
+- `skill2-test`: isolated activation/outcome testing.
+- `skill2-package`: make a skill repo installable.
+- `skill2-audit`: scan a skill library.
+- `skill2-prune`: suggest keep/merge/downgrade/projectize/delete.
 
 ## Planned CLI
 
@@ -57,6 +79,7 @@ Reproduce one real maintenance decision:
 - [Architecture](docs/ARCHITECTURE.md)
 - [Isolated testing](docs/ISOLATED_TESTING.md)
 - [Prior art](docs/PRIOR_ART.md)
+- [Popular skill repo references](docs/SKILL_REPO_REFERENCES.md)
 
 ## License
 

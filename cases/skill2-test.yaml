@@ -1,0 +1,18 @@
+skill: skill2-test
+agent: codex
+cases:
+  - name: 核心正例
+    prompt: "测试这个 skill 是否会触发，并给我隔离测试方法"
+    expect_activation: skill2-test
+    assertions:
+      - type: contains
+        value: "隔离"
+
+  - name: 反例
+    prompt: "帮我把 README 的错别字改一下"
+    expect_not_activation:
+      - skill2-test
+
+  - name: 打包相邻场景
+    prompt: "把这个 skill repo 做成别人好安装的开源仓库"
+    expect_activation: skill2-package
