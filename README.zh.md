@@ -10,13 +10,14 @@ Skills 是产品界面。CLI 是脚手架和确定性检查工具，供这些 sk
 
 ## 状态
 
-设计仓库。CLI 还未发布。
+早期仓库。Skill 包已存在。CLI 当前支持 `scaffold skill`、`lint`、`scan`。
 
 ## 为什么做
 
 Agent skills 正在变成 package-like 的东西。技能库也需要像代码一样维护：
 
 - lint：frontmatter、description、断链、危险脚本
+- packaging hygiene：secrets、机器本地路径、脚本权限
 - coverage：哪些 skill 真的触发过
 - analytics：高频、低频、从未调用、共现
 - pruning：删除、合并、降级为 reference、移动到项目级
@@ -45,10 +46,17 @@ cp -R skills/skill2-* /path/to/repo/.agents/skills/
 - `skill2-audit`：审计 skill library。
 - `skill2-prune`：建议保留、合并、降级、项目化、删除。
 
-## 计划命令
+## CLI
 
 ```bash
+skill2 scaffold skill my-skill --description "Use when ..."
+skill2 lint skills
 skill2 scan ~/workspace/my-agent-config/skills --json > skill2-scan.json
+```
+
+计划命令：
+
+```bash
 skill2 usage --codex ~/.codex --claude ~/.claude --opencode ~/.config/opencode --json > skill2-usage.json
 skill2 test ./skills/agent-search --agent codex --cases cases/agent-search.yaml --isolate
 skill2 report --scan skill2-scan.json --usage skill2-usage.json --out report.html

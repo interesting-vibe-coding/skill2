@@ -12,7 +12,21 @@ Target repo:
 
 ## Scope
 
-### 1. scan
+### 1. scaffold
+
+Status: implemented.
+
+```bash
+skill2 scaffold skill my-skill --description "Use when ..."
+```
+
+Output:
+
+- `skills/<name>/SKILL.md`
+
+### 2. lint / scan
+
+Status: implemented.
 
 Input: `skills/` directory.
 
@@ -26,9 +40,14 @@ Output:
 - scripts
 - frontmatter issues
 - missing internal references
-- duplicate or overlapping trigger text
+- missing markdown links
+- possible secrets
+- machine-local absolute paths
+- non-executable scripts
 
-### 2. usage
+### 3. usage
+
+Status: planned.
 
 Input:
 
@@ -53,7 +72,9 @@ Later split:
 - broad scan
 - worker read
 
-### 3. report
+### 4. report
+
+Status: planned.
 
 Generate local HTML:
 
@@ -66,7 +87,9 @@ Generate local HTML:
 - missing references
 - merge/downgrade candidates
 
-### 4. test
+### 5. test
+
+Status: planned.
 
 Input:
 
@@ -90,7 +113,9 @@ Isolation:
 - no unrelated skills
 - no hidden prior context
 
-### 5. suggest
+### 6. suggest
+
+Status: planned.
 
 Initial rules:
 
@@ -103,6 +128,8 @@ Initial rules:
 ## Success Criteria
 
 - `skill2 scan ~/workspace/my-agent-config/skills` emits useful JSON.
+- `skill2 scaffold skill <name>` creates valid `SKILL.md`.
+- `skill2 lint skills` exits 0 on current Skill2 skills.
 - `skill2 usage --codex ~/.codex` extracts at least one real skill path signal.
 - `skill2 test <skill>` runs positive/negative scenarios in isolated Codex mode.
 - `skill2 report` creates readable local HTML.

@@ -10,13 +10,14 @@ Skills are the product surface. CLI is scaffolding and deterministic checks used
 
 ## Status
 
-Design repo. CLI not shipped yet.
+Early repo. Skill pack exists. CLI currently supports `scaffold skill`, `lint`, and `scan`.
 
 ## Why
 
 Agent skills are becoming package-like. They need the same maintenance loop as code:
 
 - lint: broken frontmatter, long descriptions, missing references, unsafe scripts
+- packaging hygiene: secrets, machine-local paths, script permissions
 - coverage: which skills actually trigger
 - analytics: high-frequency, low-frequency, never-used, co-activated skills
 - pruning: delete, merge, downgrade to reference, or move to project-level scope
@@ -45,10 +46,17 @@ cp -R skills/skill2-* /path/to/repo/.agents/skills/
 - `skill2-audit`: scan a skill library.
 - `skill2-prune`: suggest keep/merge/downgrade/projectize/delete.
 
-## Planned CLI
+## CLI
 
 ```bash
+skill2 scaffold skill my-skill --description "Use when ..."
+skill2 lint skills
 skill2 scan ~/workspace/my-agent-config/skills --json > skill2-scan.json
+```
+
+Planned:
+
+```bash
 skill2 usage --codex ~/.codex --claude ~/.claude --opencode ~/.config/opencode --json > skill2-usage.json
 skill2 test ./skills/agent-search --agent codex --cases cases/agent-search.yaml --isolate
 skill2 report --scan skill2-scan.json --usage skill2-usage.json --out report.html

@@ -4,7 +4,9 @@
 
 ```text
 skill2
+  scaffold create skill files
   scan      read skill files
+  lint      validate skill files
   usage     read local logs / hook events
   test      run isolated skill scenarios
   report    build dashboard
@@ -101,6 +103,16 @@ Store locally:
 ```
 
 No network. No hosted telemetry.
+
+## Implemented Commands
+
+```bash
+skill2 scaffold skill <name> [-o skills] [--description "..."]
+skill2 lint [path] [--json]
+skill2 scan [path] [--json]
+```
+
+`scan` is currently an alias for `lint`.
 
 ## Test Runner
 
