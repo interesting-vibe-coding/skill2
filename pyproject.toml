@@ -1,0 +1,16 @@
+[project]
+name = "skill2"
+version = "0.0.0"
+description = "Skills for your skills: local governance for agent skill libraries."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Yinghao Tang" }]
+dependencies = []
+
+[project.scripts]
+skill2 = "skill2.cli:main"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
