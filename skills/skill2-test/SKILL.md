@@ -1,6 +1,6 @@
 ---
 name: skill2-test
-description: "隔离测试 agent skill：验证触发、误触发、输出断言。"
+description: "用户问 skill 是否有效、是否触发、是否误触发，或要求隔离评测时使用。"
 ---
 
 # Skill2 Test

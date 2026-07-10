@@ -3,7 +3,6 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-
 _NAME_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 
 

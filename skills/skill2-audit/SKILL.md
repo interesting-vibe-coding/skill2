@@ -1,6 +1,6 @@
 ---
 name: skill2-audit
-description: "审计 skill library：结构、断链、重复触发、危险脚本、体积、安装性。"
+description: "用户要审计 skill library 的结构、安全、断链、体积或触发冲突时使用。"
 ---
 
 # Skill2 Audit

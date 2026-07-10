@@ -1,6 +1,6 @@
 ---
 name: skill2-prune
-description: "清理 skill library：基于 usage/report 建议保留、合并、降级、项目化、删除。"
+description: "用户要清理 skill library，判断保留、合并、降级、项目化或删除时使用。"
 ---
 
 # Skill2 Prune

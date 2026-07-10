@@ -1,146 +1,142 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from pathlib import Path
 import re
+from collections import Counter
+from pathlib import Path
 
+from .models import Issue, LintResult, ScanResult, Severity, SkillRecord
+from .scan import scan_path
 
 _LOCAL_PATH_RE = re.compile(r"/Users/[A-Za-z0-9._-]+/|/home/[A-Za-z0-9._-]+/")
 _SECRET_RE = re.compile(
     r"(sk-[A-Za-z0-9_-]{8,}|ghp_[A-Za-z0-9_]{8,}|(?:api[_-]?key|password|secret|token)\s*[:=])",
     re.I,
 )
+_SEVERITY_ORDER = {Severity.ERROR: 0, Severity.WARN: 1, Severity.ADVICE: 2}
 
 
-@dataclass(frozen=True)
-class Issue:
-    severity: str
-    path: str
-    message: str
+def lint_scan(scan: ScanResult) -> LintResult:
+    issues: list[Issue] = []
+    for skill in scan.skills:
+        issues.extend(_lint_skill(skill))
 
-    def to_dict(self) -> dict[str, str]:
-        return {"severity": self.severity, "path": self.path, "message": self.message}
+    duplicates = {
+        name for name, count in Counter(skill.name for skill in scan.skills).items() if count > 1
+    }
+    for skill in scan.skills:
+        if skill.name in duplicates:
+            issues.append(
+                Issue(
+                    Severity.ERROR,
+                    skill.path,
+                    f"duplicate skill name: {skill.name}",
+                    "S2F005",
+                )
+            )
 
+    if not scan.skills:
+        issues.append(Issue(Severity.ERROR, scan.root, "no SKILL.md found", "S2F000"))
 
-@dataclass(frozen=True)
-class LintResult:
-    checked: int
-    issues: list[Issue]
-
-    @property
-    def has_errors(self) -> bool:
-        return any(issue.severity == "ERROR" for issue in self.issues)
-
-    def to_dict(self) -> dict[str, object]:
-        return {
-            "checked": self.checked,
-            "issues": [issue.to_dict() for issue in self.issues],
-        }
+    ordered = tuple(
+        sorted(
+            issues,
+            key=lambda issue: (
+                issue.path,
+                _SEVERITY_ORDER[issue.severity],
+                issue.rule_id,
+                issue.message,
+            ),
+        )
+    )
+    return LintResult(root=scan.root, checked=len(scan.skills), issues=ordered)
 
 
 def lint_path(path: Path) -> LintResult:
-    skill_files = _find_skill_files(path)
+    return lint_scan(scan_path(path))
+
+
+def _lint_skill(skill: SkillRecord) -> list[Issue]:
+    source = skill._source
+    path = skill.path
     issues: list[Issue] = []
-    for skill_file in skill_files:
-        issues.extend(_lint_skill(skill_file))
-    if not skill_files:
-        issues.append(Issue("ERROR", str(path), "no SKILL.md found"))
-    return LintResult(checked=len(skill_files), issues=issues)
 
-
-def _find_skill_files(path: Path) -> list[Path]:
-    if path.is_file() and path.name == "SKILL.md":
-        return [path]
-    if path.is_dir() and (path / "SKILL.md").exists():
-        return [path / "SKILL.md"]
-    if path.is_dir():
-        return sorted(path.glob("*/SKILL.md"))
-    return []
-
-
-def _lint_skill(skill_file: Path) -> list[Issue]:
-    issues: list[Issue] = []
-    text = skill_file.read_text(encoding="utf-8")
-    fm, body = _split_frontmatter(text)
-    rel = str(skill_file)
-
-    if fm is None:
-        issues.append(Issue("ERROR", rel, "missing frontmatter"))
+    if source.frontmatter_error:
+        issues.append(Issue(Severity.ERROR, path, source.frontmatter_error, "S2F001"))
         return issues
 
-    name = fm.get("name", "")
-    description = fm.get("description", "")
-    expected = skill_file.parent.name
+    frontmatter = source.frontmatter or {}
+    name = frontmatter.get("name")
+    description = frontmatter.get("description")
+    expected = Path(path).parent.name
 
-    if not name:
-        issues.append(Issue("ERROR", rel, "missing name"))
+    if name is None or name == "":
+        issues.append(Issue(Severity.ERROR, path, "missing name", "S2F002"))
+    elif not isinstance(name, str):
+        issues.append(Issue(Severity.ERROR, path, "name must be a string", "S2F002"))
     elif name != expected:
-        issues.append(Issue("ERROR", rel, f"name `{name}` does not match directory `{expected}`"))
+        issues.append(
+            Issue(
+                Severity.ERROR,
+                path,
+                f"name `{name}` does not match directory `{expected}`",
+                "S2F003",
+            )
+        )
 
-    if not description:
-        issues.append(Issue("ERROR", rel, "missing description"))
+    if description is None or description == "":
+        issues.append(Issue(Severity.ERROR, path, "missing description", "S2F004"))
+    elif not isinstance(description, str):
+        issues.append(Issue(Severity.ERROR, path, "description must be a string", "S2F004"))
     elif len(description) > 140:
-        issues.append(Issue("WARN", rel, "description too long"))
+        issues.append(Issue(Severity.WARN, path, "description too long", "S2Q001"))
 
-    if len(body.strip()) < 40:
-        issues.append(Issue("WARN", rel, "body too short"))
+    if len(source.body.strip()) < 40:
+        issues.append(Issue(Severity.WARN, path, "body too short", "S2Q002"))
+    if skill.body_tokens > 2_000:
+        issues.append(
+            Issue(
+                Severity.ADVICE,
+                path,
+                "large body; consider moving detail to references",
+                "S2Q003",
+            )
+        )
+    if _LOCAL_PATH_RE.search(source.body):
+        issues.append(Issue(Severity.WARN, path, "contains machine-local absolute path", "S2P001"))
+    if _SECRET_RE.search(source.text):
+        issues.append(Issue(Severity.ERROR, path, "possible secret or credential text", "S2S001"))
 
-    if _LOCAL_PATH_RE.search(body):
-        issues.append(Issue("WARN", rel, "contains machine-local absolute path"))
+    for script in source.scripts:
+        if not script.executable:
+            issues.append(
+                Issue(
+                    Severity.WARN,
+                    str(Path(path).parent / script.path),
+                    "script is not executable",
+                    "S2X001",
+                )
+            )
 
-    if _SECRET_RE.search(text):
-        issues.append(Issue("ERROR", rel, "possible secret or credential text"))
-
-    scripts_dir = skill_file.parent / "scripts"
-    if scripts_dir.is_dir():
-        for script in sorted(p for p in scripts_dir.iterdir() if p.is_file()):
-            if script.suffix in {".sh", ".py"} and not _is_executable(script):
-                issues.append(Issue("WARN", str(script), "script is not executable"))
-
-    for ref in _markdown_links(body):
-        if "://" in ref or ref.startswith("#"):
+    for link in source.links:
+        if link.exists:
             continue
-        target = (skill_file.parent / ref).resolve()
-        if not target.exists():
-            issues.append(Issue("ERROR", rel, f"missing reference: {ref}"))
+        label = {"assets": "asset", "scripts": "script"}.get(link.kind, "reference")
+        issues.append(
+            Issue(
+                Severity.ERROR,
+                path,
+                f"missing {label}: {link.target}",
+                "S2L001",
+            )
+        )
 
     return issues
 
 
-def _is_executable(path: Path) -> bool:
-    return bool(path.stat().st_mode & 0o111)
-
-
-def _split_frontmatter(text: str) -> tuple[dict[str, str] | None, str]:
-    if not text.startswith("---\n"):
-        return None, text
-    end = text.find("\n---\n", 4)
-    if end == -1:
-        return None, text
-    raw = text[4:end]
-    body = text[end + 5 :]
-    data: dict[str, str] = {}
-    for line in raw.splitlines():
-        if ":" not in line:
-            continue
-        key, value = line.split(":", 1)
-        value = value.strip()
-        if len(value) >= 2 and value[0] == value[-1] == '"':
-            value = value[1:-1]
-        data[key.strip()] = value
-    return data, body
-
-
-def _markdown_links(text: str) -> list[str]:
-    refs: list[str] = []
-    i = 0
-    while True:
-        start = text.find("](", i)
-        if start == -1:
-            break
-        end = text.find(")", start + 2)
-        if end == -1:
-            break
-        refs.append(text[start + 2 : end].strip())
-        i = end + 1
-    return refs
+__all__ = [
+    "Issue",
+    "LintResult",
+    "Severity",
+    "lint_path",
+    "lint_scan",
+]

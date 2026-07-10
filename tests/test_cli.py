@@ -7,7 +7,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -115,6 +114,54 @@ Run script when deterministic work is needed.
             payload = json.loads(result.stdout)
             messages = [issue["message"] for issue in payload["issues"]]
             self.assertIn("script is not executable", messages)
+
+    def test_scan_emits_stable_inventory(self) -> None:
+        result = run_cli("scan", "skills", "--json")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["schema_version"], "1")
+        self.assertEqual(len(payload["skills"]), 6)
+        publish = next(skill for skill in payload["skills"] if skill["name"] == "skill2-publish")
+        self.assertEqual(publish["scope"], "project")
+        self.assertEqual(len(publish["hash"]), 64)
+        self.assertGreater(publish["body_tokens"], 0)
+
+    def test_scan_parses_yaml_and_markdown_resources(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "skills" / "demo"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            (references / "guide.md").write_text("guide\n", encoding="utf-8")
+            (skill_dir / "SKILL.md").write_text(
+                """---
+name: demo
+description: >-
+  Use when multiline YAML metadata
+  must parse correctly.
+---
+
+# demo
+
+Read [guide](references/guide.md#top) before doing deterministic work.
+""",
+                encoding="utf-8",
+            )
+            result = run_cli("scan", str(skill_dir), "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(result.stdout)
+            skill = payload["skills"][0]
+            self.assertEqual(
+                skill["description"],
+                "Use when multiline YAML metadata must parse correctly.",
+            )
+            self.assertEqual(skill["references"], ["references/guide.md"])
+
+    def test_lint_emits_sarif(self) -> None:
+        result = run_cli("lint", "skills", "--format", "sarif")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["version"], "2.1.0")
+        self.assertEqual(payload["runs"][0]["tool"]["driver"]["name"], "skill2")
 
 
 if __name__ == "__main__":

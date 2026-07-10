@@ -1,6 +1,6 @@
 ---
 name: skill2-build
-description: "创建或改进 agent skill：定范围、写 SKILL.md、生成测试场景、跑 lint。"
+description: "用户要新建、改写、拆分或整理 agent skill 时使用。"
 ---
 
 # Skill2 Build

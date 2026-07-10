@@ -1,11 +1,17 @@
 ---
 name: skill2-package
-description: "把 skill repo 做成别人好安装的开源包：结构、README、install、manifest、质量门。"
+description: "用户要把 skill repo 做成可安装候选物、补 manifest/installer，或检查跨 harness 兼容性时使用。"
 ---
 
 # Skill2 Package
 
-目标：让 skill repo 可安装、可审查、可发布。
+目标：生成可安装、可审查、可复现的 skill repo 候选物。
+
+## 边界
+
+- Package：结构、manifest、installer、artifact、安装 smoke test。
+- Publish：README、repo metadata、tag、release、registry/marketplace。
+- 禁止 tag、push、release、upload。
 
 ## 推荐结构
 
@@ -14,45 +20,30 @@ README.md
 LICENSE
 CHANGELOG.md
 install.sh
-skills/
-  skill-name/
-    SKILL.md
-    references/
-    scripts/
-    assets/
+skills/<name>/SKILL.md
 cases/
-examples/
-.claude-plugin/
 .codex-plugin/
+.claude-plugin/
 ```
 
-## 必查
+只创建目标 harness 需要的 metadata。通用 skill 内容留在 `skills/`。
 
-- `SKILL.md` frontmatter 有效。
-- `description` 短，像触发器。
-- `references/` 全部存在。
-- scripts 可执行、可审计。
-- `install.sh` 支持 dry-run 或明确目标。
-- README 写清安装、使用、兼容性、隐私。
-- 无 secrets、无机器本地绝对路径、无无用大文件。
+## 质量门
 
-## 安装入口
-
-优先支持：
-
-```bash
-npx skill2 init
-```
-
-并保留手动安装：
-
-```bash
-cp -R skills/skill2-* .agents/skills/
-```
+- frontmatter 有效；`name` 和目录一致。
+- references/scripts/assets 路径存在。
+- scripts 可审计；执行权限正确。
+- installer 支持明确目标；重复执行可预测。
+- 无 secrets、机器本地路径、无用大文件。
+- 全新临时环境安装通过。
+- README 存在且安装命令指向当前 artifact；具体文案交给 `skill2-publish`。
 
 ## CLI
 
 ```bash
-skill2 scaffold skill-repo
-skill2 lint --package
+skill2 scaffold skill-repo <name>
+skill2 lint skills
+skill2 package-check . --json
 ```
+
+输出候选 artifact、版本、校验和、检查结果。交给 `skill2-publish`。
