@@ -21,7 +21,7 @@ Skill2 CLI：提供脚手架、lint、隔离测试、使用记录提取、报告
 
 ```text
 别人把 Skill2 skills 装进自己的仓库
-→ 他们的 agent 学会怎么 build/test/package/audit/prune skills
+→ 他们的 agent 学会怎么 build/test/package/publish/audit/prune skills
 → 需要确定性执行时再调用 skill2 CLI
 ```
 
@@ -51,6 +51,9 @@ skill2/
       SKILL.md
       references/
     skill2-package/
+      SKILL.md
+      references/
+    skill2-publish/
       SKILL.md
       references/
     skill2-audit/
@@ -112,18 +115,40 @@ skill2 test ./skills/foo --agent codex --cases cases/foo.yaml --isolate
 
 Agent 负责：
 
-- 建立开源 repo 结构
-- 写安装说明
+- 建立可分发 repo 结构
 - 检查跨 harness 兼容性
-- 添加 license、changelog、示例
 - 检查是否有 secrets、绝对路径、大文件、坏链接
-- 需要时生成 plugin/marketplace metadata
+- 生成 installer、plugin/marketplace metadata
+- 验证安装产物可复现
 
 CLI 支持：
 
 ```bash
 skill2 scaffold skill-repo
-skill2 lint --package
+skill2 package-check . --json
+```
+
+### `skill2-publish`
+
+触发：用户想公开发布、release、改善 README，或验证别人能否安装一个 skill repo。
+
+Agent 负责：
+
+- 写英文主 README 与中文 README
+- 做品牌首屏、准确能力表、真实预览
+- 保留一个主安装命令
+- 配置 repo description、topics、license、changelog、release
+- 检查 README、manifest、installer、release 版本一致
+- 先输出 dry-run：版本、diff、artifact、目标、远端动作
+- tag、push、release、registry/marketplace 上传前获取用户显式确认
+- 在全新环境和公开 URL 上跑安装 smoke test
+- 只宣传已交付能力
+
+CLI 支持：
+
+```bash
+skill2 package-check . --json
+skill2 lint skills
 ```
 
 ### `skill2-audit`
@@ -319,7 +344,7 @@ Skill2 要组合：
 
 ## 实施顺序
 
-数据契约 → 真实 scan → Codex 隔离测试 → package/audit → usage → report/suggest → 0.1 发布。
+数据契约 → 真实 scan → Codex 隔离测试 → package/publish/audit → usage → report/suggest → 0.1 发布。
 
 详细阶段、依赖、验收见 [路线图](ROADMAP.md)。
 
@@ -340,5 +365,7 @@ skills/skill2-package/SKILL.md
 skills/skill2-audit/SKILL.md
 skills/skill2-prune/SKILL.md
 ```
+
+计划新增 `skills/skill2-publish/SKILL.md`。全部六个子 Skill 必须有单 Skill 隔离测试；整包另跑路由冲突测试。
 
 当前 CLI 已支持 `scaffold`、`lint`，`scan` 暂为 `lint` 别名。下一步按路线图 M0 执行。

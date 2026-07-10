@@ -5,9 +5,9 @@
 Skill2 是 **agent skill 工程系统**。
 
 ```text
-Skill2 skills：教 agent 设计、测试、打包、审计、清理 skills。
+Skill2 skills：教 agent 设计、测试、打包、发布、审计、清理 skills。
 Skill2 CLI：提供可复现的扫描、隔离运行、日志解析、报告生成。
-本地证据：连接 build → test → package → observe → prune。
+本地证据：连接 build → test → package → publish → observe → prune。
 ```
 
 用户安装的是一组 skills。CLI 是 skills 调用的确定性执行层，不是主要产品界面。
@@ -74,6 +74,19 @@ Skill2 不做：
 - 不把 `allowed-tools` 当用户授权。
 - 不默认执行第三方 skill 内脚本。
 
+### Publish
+
+来自 `oss-readme`、`skill-repo-packaging`、Superpowers：
+
+- Package 负责“产物正确”；Publish 负责“公开仓库可发现、可理解、可安装、可验证”。
+- README 是发布界面：品牌、准确定位、一个主安装命令、能力表、真实预览、隐私与限制。
+- `README.md` 英文主版；`README.zh.md` 中文版；安装命令一致。
+- repo metadata、license、changelog、release、plugin manifest 与安装器必须互相一致。
+- 发布先 dry-run：版本、diff、artifact、目标 registry/marketplace、远端动作完整列出。
+- tag、push、GitHub Release、registry/marketplace 上传前必须获得用户显式确认。
+- 发布前在全新临时环境跑安装 smoke test；发布后从公开 URL 再测一次。
+- README 只写已交付能力，不把计划当功能。
+
 ### Observe / Prune
 
 Skill2 自己补的层：
@@ -94,7 +107,10 @@ skill2-test
   isolate → activate → assert outcome → compare baseline → record evidence
 
 skill2-package
-  validate → preview → adapter metadata → install smoke test
+  validate → assemble → adapter metadata → package check
+
+skill2-publish
+  README → repo metadata → release → public install smoke test
 
 skill2-audit
   scan → lint → security → behavior gaps → report
@@ -160,20 +176,39 @@ CLI 产物默认写入 `.skill2/`：
 - Outcome：contains、regex、file exists/content、exit code、tool evidence。
 - 支持无 skill baseline、3 trials、JSON/JUnit 输出。
 - `skill2-build` 强制生成 case；用 Skill2 测 Skill2 自己。
+- 六个子 Skill 各有独立 case 文件：
 
-验收：`cases/skill2-test.yaml` 在隔离环境跑通正例、反例、baseline；失败可解释、可复现。
+```text
+cases/skill2-build.yaml
+cases/skill2-test.yaml
+cases/skill2-package.yaml
+cases/skill2-publish.yaml
+cases/skill2-audit.yaml
+cases/skill2-prune.yaml
+```
 
-### M2：Package + Audit
+- 单 Skill 隔离套件：只安装目标 Skill，测 positive、adjacent、negative、outcome、baseline。
+- 整包路由套件：安装六个 Skill，测相邻触发与 confusion matrix。
+- 重点冲突：`build/test`、`package/publish`、`audit/prune`。
+- Golden E2E：Skill2 创建、测试、打包、发布检查一个 fixture skill repo。
+
+验收：六个 case 文件全部通过单 Skill 隔离；整包路由无已知误触发；Golden E2E 可复现。
+
+### M2：Package + Publish + Audit
 
 目标：让 skill repo 可安装、可审查。
 
 - `scaffold skill-repo`。
 - `package-check`：spec、断链、权限、secret、危险脚本、manifest、README/install。
+- 新增 `skill2-publish`：README、repo metadata、release、公开安装验收。
+- `skill2-package` 收窄：只负责结构、manifest、installer、可复现产物；禁止 tag、push、upload。
+- Publish README 门：双语、品牌首屏、准确能力表、单一主安装命令、隐私/兼容性/限制。
+- Publish 外部动作门：dry-run → 用户确认 → tag/release/upload → 公开安装复测。
 - Codex adapter；Claude/OpenCode 只做路径与 metadata 兼容检查。
 - install preview、冲突检测、来源/ref/tree SHA 记录、原子安装 smoke test。
 - SARIF 输出；PR lint、变更 skill 行为测试、定时全量测试。
 
-验收：全新临时目录可安装 Skill2 skills；重复安装可预测；无隐式脚本执行。
+验收：Skill2 用 `skill2-publish` 对自己完成 preflight/dry-run；全新临时目录可安装；README 与实际能力一致；重复安装可预测；无隐式脚本执行。
 
 ### M3：Usage
 
@@ -204,11 +239,14 @@ CLI 产物默认写入 `.skill2/`：
 
 目标：别人可以安装并完成完整闭环。
 
-- dogfood 全部 5 个 Skill2 skills。
+- dogfood 全部 6 个 Skill2 skills。
+- 每个子 Skill 有隔离测试；整包有路由测试；发布流程有公开安装测试。
 - CLI help、错误信息、退出码、隐私说明稳定。
 - 示例仓库与 golden report。
 - Python package 发布；skills 安装脚本保留。
 - changelog、版本、release artifact、安装 smoke test。
+- 用 `skill2-publish` 执行真实 0.1 发布；确认远端动作后再 tag/push/upload。
+- 从公开 GitHub URL 与已发布 Python package 重新安装验证。
 
 验收：新用户从安装到生成第一份报告，不需修改 Skill2 源码。
 
@@ -220,8 +258,25 @@ CLI 产物默认写入 `.skill2/`：
 | Fixture | Codex JSONL、skill repo、危险样例 | 每次提交 |
 | CLI | exit code、JSON schema、snapshot | 每次提交 |
 | Integration | temp home/worktree、installer、report | PR |
+| Skill isolation | 六个子 Skill 各自 positive/negative/outcome/baseline | 变更对应 Skill 时 |
+| Pack routing | 六个 Skill 同时安装；相邻触发 confusion matrix | PR |
 | Live eval | 真实 Codex activation/outcome | PR 变更 skill 时；无凭证明确 skip |
 | Drift | 固定 cases、多 trials、版本记录 | 定时 |
+
+## 六 Skill 自测门
+
+| Skill | 相邻强反例 | Outcome |
+| --- | --- | --- |
+| `skill2-build` | test、package | 生成 skill + cases；lint 通过 |
+| `skill2-test` | build、audit | 隔离；activation/outcome 分离 |
+| `skill2-package` | publish | 产出候选物；无远端副作用 |
+| `skill2-publish` | package | README/release preflight；确认后发布；公开安装通过 |
+| `skill2-audit` | prune | 输出分级问题；不修改 |
+| `skill2-prune` | audit | 基于证据给建议；不删除 |
+
+每个 Skill：核心正例、改写正例、邻接反例、无关反例、Outcome、without-skill baseline、3 trials。
+
+`package ↔ publish` 增加成对最小词差用例，作为边界回归门。
 
 ## 0.1 默认边界
 
@@ -234,10 +289,11 @@ CLI 产物默认写入 `.skill2/`：
 - Suggest：只读建议，无自动删除。
 - Live eval：先单 harness；多 harness 留后续。
 
-## 待确认
+## 已确认决策
 
-1. 是否接受 `Codex first`，0.1 不做 Claude/OpenCode live eval。
-2. 是否接受 Python CLI，移除首版 `npx skill2 init` 承诺。
-3. 是否接受 M0 → M5 顺序；每阶段都可独立发布和 dogfood。
-4. 是否接受建议系统只输出 evidence，不自动改 skill library。
-
+- `Codex first`；0.1 不做 Claude/OpenCode live eval。
+- Python CLI；移除首版 `npx skill2 init` 承诺。
+- 按 M0 → M5 实施；每阶段独立验收和 dogfood。
+- Suggest 只输出 evidence，不自动改 skill library。
+- 新增 `skill2-publish`；与 `skill2-package` 分离。
+- 六个子 Skill 全部做单 Skill 隔离测试；另做整包路由测试。

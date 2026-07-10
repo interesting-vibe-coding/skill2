@@ -16,6 +16,8 @@ skills-first repo + optional CLI + tests + install/package metadata
 
 规范来源分三层：官方兼容性契约、社区验证实践、Skill2 生命周期策略。不要把后两层冒充官方规范。
 
+打包与发布分层：package 生成可安装候选物，不产生远端副作用；publish 写 README、做 release，并在确认后执行 tag/push/upload。
+
 ## 参考仓库
 
 | 仓库 | 规模/信号 | 结构特点 | Skill2 学什么 |
@@ -118,6 +120,7 @@ skill2 package-check
 - 超大 skill 集合无 index，用户无法判断质量。
 - 只有目录，没有测试/安装。
 - README 承诺多平台，但 repo 没对应 manifest/installer。
+- package skill 同时持有 tag/push/upload，无法安全 dry-run。
 - usage analytics 上传云端；Skill2 应 local-first。
 
 ## 对 Skill2 的结构建议
@@ -132,6 +135,7 @@ skills/
   skill2-build/
   skill2-test/
   skill2-package/
+  skill2-publish/
   skill2-audit/
   skill2-prune/
 cases/
