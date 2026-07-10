@@ -14,7 +14,7 @@
 
 | Skill | 应该交付 | 不该做 | 状态 |
 | --- | --- | --- | --- |
-| `skill2-build` | 判断 scope；写短、可测 Skill 结构 | 把 reference 拆成新 Skill | 待验收 |
+| `skill2-build` | 判断 scope；写短、可测 Skill 结构 | 把 reference 拆成新 Skill | 自动通过；人工待验收 |
 | `skill2-test` | 隔离协议；activation/outcome/baseline 边界 | 把当前 chat 当证据 | 待验收 |
 | `skill2-package` | 可安装候选物、manifest、smoke | tag/push/release | 待验收 |
 | `skill2-publish` | README、发布 preflight、确认门 | 未确认远端写入 | 待验收 |
@@ -33,6 +33,15 @@ baseline artifact:
 原因:
 新增 case:
 ```
+
+## 已跑
+
+### `skill2-build` / `build-core`
+
+- `with-skill`：activation 通过；读到隔离 `skill2-build/SKILL.md`。
+- `baseline`：outcome 也通过。
+- `deterministic_uplift`：否。
+- 人工结论：待填写。重点看 scope 判断、结构是否更短更准、测试场景是否真可用。
 
 ## 通过门
 

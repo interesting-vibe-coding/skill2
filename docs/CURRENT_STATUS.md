@@ -88,4 +88,5 @@ APFS 不保存读取计数。FSEvents 不提供可靠读取事件。系统级监
 ## Git 状态
 
 - 当前 checkpoint：`b8605b5`。
-- 已推送 `main`。
+- `skill2-build` 首张 dogfood 卡自动通过；baseline 也通过，人工结论待定。
+- 已推送 `main`；下一次 checkpoint 待提交。
