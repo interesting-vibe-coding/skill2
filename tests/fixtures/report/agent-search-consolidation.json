@@ -1,0 +1,12 @@
+{
+  "skills": [
+    {"name": "agent-search", "description": "Search and research router"},
+    {"name": "search-strategy", "description": "Search strategy for research"}
+  ],
+  "events": [
+    {"timestamp": "2026-07-01T00:00:00Z", "session": "one", "skill": "agent-search", "category": "activation"},
+    {"timestamp": "2026-07-01T00:00:01Z", "session": "one", "skill": "search-strategy", "category": "activation"},
+    {"timestamp": "2026-07-02T00:00:00Z", "session": "two", "skill": "agent-search", "category": "activation"},
+    {"timestamp": "2026-07-02T00:00:01Z", "session": "two", "skill": "search-strategy", "category": "activation"}
+  ]
+}

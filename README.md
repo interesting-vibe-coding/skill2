@@ -1,97 +1,99 @@
 <p align="center">
-  <img src="docs/readme-icon.svg" width="96" alt="Skill2 icon">
+  <img src="docs/readme-icon.svg" width="88" alt="Skill2 icon">
 </p>
 
 <h1 align="center">Skill2</h1>
 
-<p align="center">
-  Skills for your skills.
-</p>
+<p align="center"><strong>Skills for your skills.</strong></p>
 
 <p align="center">
-  A skill pack plus optional CLI for building, testing, packaging, auditing, and pruning agent skills inside your own repos.
+  An installable skill library that teaches agents to build, test, package, publish, audit, prune, and visualize other skill libraries.
 </p>
 
-<p align="center">
-  <a href="README.zh.md">中文</a>
-</p>
+<p align="center"><a href="README.zh.md">中文</a></p>
 
 <p align="center">
   <img alt="GitHub stars" src="https://img.shields.io/github/stars/MisterBrookT/skill2?style=flat-square">
-  <img alt="License" src="https://img.shields.io/github/license/MisterBrookT/skill2?style=flat-square">
-  <img alt="Python" src="https://img.shields.io/badge/python-3.11%2B-1f2933?style=flat-square">
-  <img alt="Local first" src="https://img.shields.io/badge/local--first-no%20telemetry-2dd4bf?style=flat-square">
+  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-171b1f?style=flat-square">
+  <img alt="Local first" src="https://img.shields.io/badge/data-local--only-25bdb2?style=flat-square">
+  <img alt="MIT license" src="https://img.shields.io/github/license/MisterBrookT/skill2?style=flat-square">
 </p>
 
 <p align="center">
-  <img src="docs/readme-hero.svg" alt="Skill2 manages agent skills">
+  <img src="docs/skill2-report-preview.png" alt="Skill2 local skill library report">
 </p>
-
-## Why
-
-Agent skills are becoming package-like. A repo can now carry reusable instructions, references, scripts, and tests that teach an agent how to work in that repo.
-
-Skill2 gives that layer its own maintenance loop: create skills, test whether they activate, package them for other people, audit the library, and prune what no longer earns its place.
 
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MisterBrookT/skill2/main/install.sh | bash -s -- codex
+git clone https://github.com/MisterBrookT/skill2.git ~/.skill2 && ~/.skill2/install.sh
 ```
 
-This installs the Skill2 skill pack into `~/.agents/skills`. No telemetry. No hosted service.
+Installs seven Skill2 skills and the helper CLI. Requires Git and [uv](https://docs.astral.sh/uv/). Data stays local; no hosted service or telemetry. Inspect `~/.skill2/install.sh` before running it when needed.
 
-## Skill Pack
+Installer also supports `--dry-run` and conflict-gated `--force` when run from a checkout.
 
-| Skill | Use it for |
+## Skill Library
+
+| Skill | Agent uses it when |
 | --- | --- |
-| `skill2-build` | Create or improve a skill. |
-| `skill2-test` | Isolated activation and outcome testing. |
-| `skill2-package` | Make a skill repo installable. |
-| `skill2-audit` | Scan a skill library for structure and safety issues. |
-| `skill2-prune` | Suggest keep, merge, downgrade, projectize, or delete. |
+| `skill2-build` | Creating or restructuring a skill. |
+| `skill2-test` | Testing activation and outcome in isolation. |
+| `skill2-package` | Producing an installable candidate without remote writes. |
+| `skill2-publish` | Preparing README, release, and public install checks. |
+| `skill2-audit` | Finding contract, safety, and behavior gaps. |
+| `skill2-prune` | Reviewing keep, merge, downgrade, projectize, or delete candidates. |
+| `skill2-visualize` | Viewing inventory, direct calls, zero-use candidates, and test status. |
 
-## CLI
+Ask the agent directly:
 
-The CLI is a deterministic helper used by the skills.
+```text
+Build a project-level skill for this workflow, then create isolated cases.
+Audit this skill library and show only evidence-backed findings.
+Visualize which skills are called directly and which have zero direct calls.
+```
 
-Implemented:
+## Local Evidence
+
+Skill2 scans local Agent session logs for exact `SKILL.md` reads. It separates direct activation signals from broad scans, maintenance, and worker reads. APFS does not retain historical file-open counts, so Skill2 does not claim complete usage history.
+
+Generate a self-contained report:
+
+```bash
+skill2 visualize --skills ~/workspace/my-skill-library/skills \
+  --codex ~/.codex --out skill-report.html
+```
+
+Low frequency is evidence, not a deletion decision. Prune suggestions also consider tests, ownership, project boundaries, and recent use. Reports remain local and contain no prompt or transcript content.
+
+## Helper CLI
+
+Skills call deterministic commands when prose is not enough:
 
 ```bash
 skill2 scaffold skill my-skill --description "Use when ..."
-skill2 lint skills
 skill2 scan skills --json
+skill2 lint skills --format sarif
+skill2 test skills/my-skill --cases cases/my-skill.yaml --baseline --trials 3
+skill2 package-check .
+skill2 publish-check .
+skill2 usage --skills skills --codex ~/.codex --json
+skill2 visualize --skills skills --codex ~/.codex --out report.html
 ```
 
-Planned:
+## Design
+
+Skill2 follows a Superpowers-style shape: skills are product; CLI is support. The repository dogfoods every rule it teaches. Package never publishes. Publish requires dry-run and explicit confirmation before tag, push, release, or upload. Prune never deletes automatically.
+
+See [product direction](docs/PRODUCT_DIRECTION.md), [roadmap](docs/ROADMAP.md), [isolated testing](docs/ISOLATED_TESTING.md), and [prior art](docs/PRIOR_ART.md).
+
+## Development
 
 ```bash
-skill2 test ./skills/my-skill --agent codex --cases cases/my-skill.yaml --isolate
-skill2 usage --codex ~/.codex --json
-skill2 report --out report.html
-skill2 suggest --repo .
+uv sync
+PYTHONPATH=src uv run python -m unittest discover -s tests
+uv run ruff check .
+uv run skill2 lint skills
 ```
-
-## Local Checks
-
-```bash
-python3 -m unittest discover -s tests
-PYTHONPATH=src python3 -m skill2.cli lint skills
-```
-
-## Docs
-
-- [Product direction](docs/PRODUCT_DIRECTION.md)
-- [MVP](docs/MVP.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Isolated testing](docs/ISOLATED_TESTING.md)
-- [Prior art](docs/PRIOR_ART.md)
-- [Popular skill repo references](docs/SKILL_REPO_REFERENCES.md)
-
-## Status
-
-Early. Skill pack exists. CLI supports scaffold and lint. Isolated runtime tests, usage parsing, and dashboard reports are next.
-
-## License
 
 MIT

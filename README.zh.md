@@ -1,97 +1,99 @@
 <p align="center">
-  <img src="docs/readme-icon.svg" width="96" alt="Skill2 icon">
+  <img src="docs/readme-icon.svg" width="88" alt="Skill2 图标">
 </p>
 
 <h1 align="center">Skill2</h1>
 
-<p align="center">
-  给 skill 的 skill。
-</p>
+<p align="center"><strong>给 Skills 的 Skills。</strong></p>
 
 <p align="center">
-  一个 skill 包，附带可选 CLI，用来在你的仓库里构建、测试、打包、审计、清理 agent skills。
+  一个可安装的 Skill Library，教 Agent 构建、测试、打包、发布、审计、精简、可视化其他 Skill Library。
 </p>
 
-<p align="center">
-  <a href="README.md">English</a>
-</p>
+<p align="center"><a href="README.md">English</a></p>
 
 <p align="center">
   <img alt="GitHub stars" src="https://img.shields.io/github/stars/MisterBrookT/skill2?style=flat-square">
-  <img alt="License" src="https://img.shields.io/github/license/MisterBrookT/skill2?style=flat-square">
-  <img alt="Python" src="https://img.shields.io/badge/python-3.11%2B-1f2933?style=flat-square">
-  <img alt="Local first" src="https://img.shields.io/badge/local--first-no%20telemetry-2dd4bf?style=flat-square">
+  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-171b1f?style=flat-square">
+  <img alt="本地数据" src="https://img.shields.io/badge/data-local--only-25bdb2?style=flat-square">
+  <img alt="MIT license" src="https://img.shields.io/github/license/MisterBrookT/skill2?style=flat-square">
 </p>
 
 <p align="center">
-  <img src="docs/readme-hero.svg" alt="Skill2 manages agent skills">
+  <img src="docs/skill2-report-preview.png" alt="Skill2 本地 Skill Library 报告">
 </p>
-
-## 为什么做
-
-Agent skills 正在变成类似 package 的东西。一个仓库可以携带可复用的 instructions、references、scripts、tests，让 agent 学会怎么在这个仓库里工作。
-
-Skill2 给这一层补维护闭环：创建 skill，测试是否触发，打包给别人安装，审计整个库，清理不再值得保留的 skill。
 
 ## 安装
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MisterBrookT/skill2/main/install.sh | bash -s -- codex
+git clone https://github.com/MisterBrookT/skill2.git ~/.skill2 && ~/.skill2/install.sh
 ```
 
-这会把 Skill2 skill 包安装到 `~/.agents/skills`。无 telemetry。无托管服务。
+安装七个 Skill2 Skills 和辅助 CLI。依赖 Git 与 [uv](https://docs.astral.sh/uv/)。数据只留本地；无托管服务，无 telemetry。需要时可先检查 `~/.skill2/install.sh`。
 
-## Skill 包
+从 checkout 运行时，安装器还支持 `--dry-run`；发现冲突后必须显式 `--force`。
 
-| Skill | 用途 |
+## Skill Library
+
+| Skill | Agent 何时使用 |
 | --- | --- |
-| `skill2-build` | 创建或改进 skill。 |
-| `skill2-test` | 隔离测试触发和输出。 |
-| `skill2-package` | 把 skill repo 做成可安装包。 |
-| `skill2-audit` | 扫描 skill library 的结构和安全问题。 |
-| `skill2-prune` | 建议保留、合并、降级、项目化、删除。 |
+| `skill2-build` | 创建或重构 Skill。 |
+| `skill2-test` | 隔离测试触发和结果。 |
+| `skill2-package` | 生成可安装候选物；不写远端。 |
+| `skill2-publish` | 准备 README、Release、公开安装检查。 |
+| `skill2-audit` | 查找契约、安全、行为缺口。 |
+| `skill2-prune` | 判断保留、合并、降级、项目化、删除候选。 |
+| `skill2-visualize` | 查看库存、直接调用、零调用候选、测试状态。 |
 
-## CLI
+直接告诉 Agent：
 
-CLI 是给 skills 调用的确定性助手。
+```text
+给这个工作流构建一个项目级 Skill，再生成隔离测试 cases。
+审计这个 Skill Library，只给有证据的问题。
+可视化哪些 Skills 被直接调用，哪些没有直接调用。
+```
 
-已实现：
+## 本地证据
+
+Skill2 从本地 Agent session 日志识别精确 `SKILL.md` 读取，区分直接调用、批量扫描、维护、Worker 读取。APFS 不保存历史文件打开次数，因此 Skill2 不声称掌握完整使用历史。
+
+生成自包含报告：
+
+```bash
+skill2 visualize --skills ~/workspace/my-skill-library/skills \
+  --codex ~/.codex --out skill-report.html
+```
+
+低频是证据，不是删除结论。Prune 还会结合测试、owner、项目边界、最近使用。报告留在本地，不包含 prompt 或 transcript。
+
+## 辅助 CLI
+
+Skills 在需要确定性结果时调用：
 
 ```bash
 skill2 scaffold skill my-skill --description "Use when ..."
-skill2 lint skills
 skill2 scan skills --json
+skill2 lint skills --format sarif
+skill2 test skills/my-skill --cases cases/my-skill.yaml --baseline --trials 3
+skill2 package-check .
+skill2 publish-check .
+skill2 usage --skills skills --codex ~/.codex --json
+skill2 visualize --skills skills --codex ~/.codex --out report.html
 ```
 
-计划：
+## 设计
+
+Skill2 采用 Superpowers 型结构：Skills 是产品，CLI 是脚手架。仓库必须符合自己教的规则。Package 不发布。Publish 在 tag、push、Release、upload 前必须 dry-run 并获得明确确认。Prune 不自动删除。
+
+详见[产品定位](docs/PRODUCT_DIRECTION.md)、[路线图](docs/ROADMAP.md)、[隔离测试](docs/ISOLATED_TESTING.md)、[先例调研](docs/PRIOR_ART.md)。
+
+## 开发
 
 ```bash
-skill2 test ./skills/my-skill --agent codex --cases cases/my-skill.yaml --isolate
-skill2 usage --codex ~/.codex --json
-skill2 report --out report.html
-skill2 suggest --repo .
+uv sync
+PYTHONPATH=src uv run python -m unittest discover -s tests
+uv run ruff check .
+uv run skill2 lint skills
 ```
-
-## 本地检查
-
-```bash
-python3 -m unittest discover -s tests
-PYTHONPATH=src python3 -m skill2.cli lint skills
-```
-
-## 文档
-
-- [产品方向](docs/PRODUCT_DIRECTION.md)
-- [最小版本](docs/MVP.md)
-- [架构](docs/ARCHITECTURE.md)
-- [隔离测试](docs/ISOLATED_TESTING.md)
-- [先例调研](docs/PRIOR_ART.md)
-- [热门 skill 仓库结构参考](docs/SKILL_REPO_REFERENCES.md)
-
-## 状态
-
-早期。Skill 包已存在。CLI 支持 scaffold 和 lint。下一步是隔离运行时测试、usage 解析、dashboard 报告。
-
-## License
 
 MIT

@@ -1,0 +1,33 @@
+schema_version: "1"
+skill: skill2-package
+agent: codex
+defaults:
+  repetitions: 3
+cases:
+  - id: package-core
+    name: 核心正例
+    kind: core_positive
+    prompt: "把 skill repo 整理成可安装候选物，补 manifest、installer 和 package checks。不要检查当前文件；只输出 checklist；不要发布。"
+    expect_activation: skill2-package
+    assertions:
+      - type: contains_any
+        values: ["manifest", "installer", "install.sh"]
+      - type: no_remote_write
+  - id: package-paraphrase
+    name: 改写正例
+    kind: paraphrase_positive
+    prompt: "检查这个 skills 目录能否跨 harness 安装，只做本地产物验证。"
+    expect_activation: skill2-package
+    assertions:
+      - type: contains_any
+        values: ["Codex", "Claude", "安装"]
+  - id: package-adjacent-publish
+    name: Publish 相邻反例
+    kind: adjacent_negative
+    prompt: "把 0.1.0 正式 tag 并创建 GitHub Release。"
+    expect_not_activation: [skill2-package]
+  - id: package-unrelated
+    name: 无关反例
+    kind: unrelated_negative
+    prompt: "优化一段 SQL 查询。"
+    expect_not_activation: [skill2-package]

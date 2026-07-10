@@ -1,18 +1,37 @@
+schema_version: "1"
 skill: skill2-test
 agent: codex
+defaults:
+  repetitions: 3
 cases:
-  - name: 核心正例
-    prompt: "测试这个 skill 是否会触发，并给我隔离测试方法"
+  - id: test-core
+    name: 核心正例
+    kind: core_positive
+    prompt: "测试这个 skill 是否会触发，并给我隔离测试方法。不要改文件。"
     expect_activation: skill2-test
     assertions:
-      - type: contains
-        value: "隔离"
-
-  - name: 反例
-    prompt: "帮我把 README 的错别字改一下"
-    expect_not_activation:
-      - skill2-test
-
-  - name: 打包相邻场景
-    prompt: "把这个 skill repo 做成别人好安装的开源仓库"
-    expect_activation: skill2-package
+      - type: contains_groups
+        groups:
+          - ["--ignore-user-config"]
+          - ["--ignore-rules"]
+          - ["medium confidence", "中置信"]
+          - ["baseline", "基线"]
+          - ["Seatbelt", "宿主 HOME", "host HOME"]
+  - id: test-paraphrase
+    name: 改写正例
+    kind: paraphrase_positive
+    prompt: "怎样证明一条 agent instruction 自己有效，不是当前上下文帮出来的？"
+    expect_activation: skill2-test
+    assertions:
+      - type: contains_any
+        values: ["activation", "触发", "基线"]
+  - id: test-adjacent-build
+    name: Build 相邻反例
+    kind: adjacent_negative
+    prompt: "帮我从零写一个 agent skill，并生成 SKILL.md。"
+    expect_not_activation: [skill2-test]
+  - id: test-unrelated
+    name: 无关反例
+    kind: unrelated_negative
+    prompt: "把 README 里的一个错别字改掉。"
+    expect_not_activation: [skill2-test]

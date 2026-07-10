@@ -1,146 +1,82 @@
-# Architecture
+# Skill2 架构
 
-## Shape
+## 边界
 
 ```text
-skill2
-  scaffold create skill files
-  scan      read skill files
-  lint      validate skill files
-  usage     read local logs / hook events
-  test      run isolated skill scenarios
-  report    build dashboard
-  suggest   produce maintenance actions
+skills/        产品：教 Agent 判断和工作流
+src/skill2/    脚手架：确定性扫描、测试、统计、报告
+cases/         行为契约
+.skill2/       本地证据；不提交
 ```
 
-## Data Model
+七个 Skills：build、test、package、publish、audit、prune、visualize。
+
+## 数据流
+
+```text
+scan ───────────────┐
+usage adapter ──────┼→ suggest → visualize.html
+isolated test runs ─┘
+```
+
+- `scan`：库存、description、body tokens、resources、hash。
+- `lint`：消费 scan；输出 ERROR/WARN/ADVICE。
+- `test`：临时 HOME/CODEX_HOME；activation/outcome/baseline 分离。
+- `usage`：读取 Agent session 日志；分类并去重。
+- `suggest`：只读维护建议。
+- `visualize`：自包含本地 HTML。
+
+## Usage 事件
 
 ```json
 {
-  "skill": {
-    "name": "agent-search",
-    "path": "/repo/skills/agent-search/SKILL.md",
-    "description": "Search/read router",
-    "body_tokens": 1200,
-    "references": ["references/search-strategy.md"],
-    "scripts": ["scripts/internet-reach-doctor.sh"],
-    "scope": "global"
-  }
+  "timestamp": "2026-07-09T21:00:00Z",
+  "harness": "codex",
+  "session": "rollout-id",
+  "skill": "agent-search",
+  "source": "command",
+  "confidence": "medium",
+  "category": "activation"
 }
 ```
 
-```json
-{
-  "activation": {
-    "timestamp": "2026-07-09T21:00:00Z",
-    "harness": "codex",
-    "session": "rollout-...",
-    "skill": "agent-search",
-    "source": "log-path-match",
-    "confidence": 0.45
-  }
-}
-```
+分类：
 
-```json
-{
-  "test_case": {
-    "name": "core trigger",
-    "prompt": "research prior art for agent skill testing",
-    "expect_activation": "agent-search",
-    "expect_not_activation": [],
-    "assertions": [{"type": "contains", "value": "prior art"}]
-  }
-}
-```
-
-```json
-{
-  "suggestion": {
-    "action": "downgrade_to_reference",
-    "target": "smart-fetch",
-    "parent": "agent-search",
-    "reason": "component skill mostly used through parent search router",
-    "evidence": ["low direct usage", "parent references it"]
-  }
-}
-```
-
-## Pipeline
-
-1. Parse skill tree.
-2. Parse usage events.
-3. Run isolated scenarios when requested.
-4. Join by normalized skill name and canonical path.
-5. Compute metrics.
-6. Run suggestion rules.
-7. Render HTML + JSON.
-
-## Event Confidence
-
-Use conservative labels.
-
-| Signal | Confidence |
+| category | 含义 |
 | --- | --- |
-| explicit skill invocation event | high |
-| system skill list only | ignore |
-| `Read` tool on exact hub `SKILL.md` | medium |
-| path string appears in old transcript | low |
-| edit to skill file | maintenance, not activation |
+| `activation` | 精确读取少量 `SKILL.md`；直接调用代理 |
+| `broad_scan` | 同 session 批量读取多个 Skills |
+| `maintenance` | 编辑、复制、移动 |
+| `worker_read` | Worker/Subagent 读取 |
+| `unknown` | 证据不足 |
 
-## Hook Route
+APFS 无历史读取计数。FSEvents 无可靠 read event。未来 `usage watch` 只可监听启动后的读取；默认关闭。
 
-Logs may be incomplete. Add optional hook recorder:
-
-```json
-{"ts":"...","harness":"codex","event":"skill_read","skill":"agent-search","path":"..."}
-```
-
-Store locally:
-
-```text
-~/.skill2/events.jsonl
-```
-
-No network. No hosted telemetry.
-
-## Implemented Commands
-
-```bash
-skill2 scaffold skill <name> [-o skills] [--description "..."]
-skill2 lint [path] [--json]
-skill2 scan [path] [--json]
-```
-
-`scan` is currently an alias for `lint`.
-
-## Test Runner
-
-`skill2 test` creates an isolated harness home:
+## 测试隔离
 
 ```text
 tmp/
-  home/
-    .codex/
-      AGENTS.md
-    .agents/
-      skills/
-        target-skill/
-          SKILL.md
-  work/
+  codex-home/     # 仅 auth、installation id、目标 Skills
+  home/           # 空用户 HOME
+  work/           # 空目录或 fixture
 ```
 
-Codex first detection:
+Codex 参数：`--ephemeral --ignore-user-config --ignore-rules --json`。macOS 外层 Seatbelt 拒绝真实 HOME 读写；PATH 去掉用户/repo 工具；非受保护环境默认失败。
 
-- high confidence if runtime exposes explicit skill event.
-- current fallback: read of exact `skills/<name>/SKILL.md` path.
-- output assertions run separately from activation detection.
+每 trial 保存：manifest、JSONL、stderr、last message、workspace artifact、断言、skill hash。
 
-Test result labels:
+长跑：每 trial 原子 checkpoint；`--resume` 跳过已完成键；可按失败率 early-stop。
 
-- `activation_pass`
-- `activation_gap`
-- `false_positive`
-- `outcome_pass`
-- `outcome_fail`
-- `inconclusive`
+## 建议安全门
+
+- merge 只用直接 activation 共现；broad scan 不算。
+- projectize 只认 `metadata.skill2.scope: project`；不从 `/workspace` 路径猜。
+- 低频不自动删除。
+- 所有建议带 evidence。
+
+## 发布安全门
+
+- Package 不产生远端副作用。
+- Publish check 只读。
+- installer 默认拒绝不同内容；`--force` 才替换。
+- tag、push、Release、upload 必须 dry-run 后再次确认。

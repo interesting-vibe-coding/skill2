@@ -1,0 +1,33 @@
+schema_version: "1"
+skill: skill2-audit
+agent: codex
+defaults:
+  repetitions: 3
+cases:
+  - id: audit-core
+    name: 核心正例
+    kind: core_positive
+    prompt: "审计 skill library 的结构、断链、危险脚本和触发冲突。不要检查当前文件；只输出审计方法和分级格式；不修改。"
+    expect_activation: skill2-audit
+    assertions:
+      - type: contains_any
+        values: ["P0", "P1", "P2", "P3"]
+      - type: no_file_changes
+  - id: audit-paraphrase
+    name: 改写正例
+    kind: paraphrase_positive
+    prompt: "帮我找出 skills 目录里会影响安装和维护的问题，按严重级别输出。"
+    expect_activation: skill2-audit
+    assertions:
+      - type: contains_any
+        values: ["严重", "ERROR", "WARN", "问题"]
+  - id: audit-adjacent-prune
+    name: Prune 相邻反例
+    kind: adjacent_negative
+    prompt: "根据半年 usage 决定哪些 skill 应合并、降级或删除。"
+    expect_not_activation: [skill2-audit]
+  - id: audit-unrelated
+    name: 无关反例
+    kind: unrelated_negative
+    prompt: "写一封会议邀请邮件。"
+    expect_not_activation: [skill2-audit]

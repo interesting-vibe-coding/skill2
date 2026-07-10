@@ -1,0 +1,2 @@
+{"timestamp":"2026-07-02T00:00:00Z","type":"session_meta","payload":{"id":"worker-1","source":{"subagent":{"thread_spawn":{"agent_role":"worker"}}},"thread_source":"subagent","agent_role":"worker"}}
+{"timestamp":"2026-07-02T00:00:01Z","type":"item.completed","item":{"type":"command_execution","command":"cat __SKILL_ROOT__/delta/SKILL.md"}}

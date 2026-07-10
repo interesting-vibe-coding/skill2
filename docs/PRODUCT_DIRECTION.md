@@ -1,371 +1,118 @@
-# 产品方向
+# Skill2 产品定位
 
-## 定位
+## 一句话
 
-Skill2 是 agent skill 工程系统：用 skills 教 agent，用 CLI 提供确定性机制，用本地证据维护 skill 生命周期。
+Skill2 是 **skills for your skills**：一个可安装的 Skill Library，帮助 Agent 管理其他 Skill Library。
 
-不是 skill 目录、中心 registry、托管 telemetry，也不是单纯 linter。
-
-## 核心判断
-
-Skill2 首先是一个 **skill 包**。
-
-CLI 是这些 skills 的确定性执行手。
+形态参考 Superpowers：
 
 ```text
-Skill2 skills：教 agent 怎么构建、测试、打包、发布、维护 skills。
-Skill2 CLI：提供脚手架、lint、隔离测试、使用记录提取、报告生成。
+用户安装 Skill2 Skills
+→ Agent 学会构建、测试、打包、发布、审计、精简、可视化 Skills
+→ 需要可重复结果时，Skills 调用辅助 CLI
 ```
 
-所以产品不是“一个 CLI 加一些文档”，而是：
+Skills 是产品。CLI 是脚手架。
+
+## 七个 Skills
+
+| Skill | 职责 | 不做 |
+| --- | --- | --- |
+| `skill2-build` | 设计、编写、重构 Skill | 不负责发布 |
+| `skill2-test` | 隔离测试触发与结果 | 不修改生产 Skill |
+| `skill2-package` | 生成可安装候选物 | 不 tag、push、upload |
+| `skill2-publish` | README、版本、Release、公开安装 | 未确认不写远端 |
+| `skill2-audit` | 扫描质量、安全、行为缺口 | 不自动修复 |
+| `skill2-prune` | keep/merge/downgrade/projectize/delete candidate | 不自动删除 |
+| `skill2-visualize` | 把库存、usage、测试、建议做成本地报告 | 不采集、不上传 |
+
+`skill2-visualize` 独立，因为“看清 Library”是独立用户意图。它只消费证据，不拥有采集逻辑。
+
+## Dogfood
+
+Skill2 必须符合自己教的规则：
 
 ```text
-别人把 Skill2 skills 装进自己的仓库
-→ 他们的 agent 学会怎么 build/test/package/publish/audit/prune skills
-→ 需要确定性执行时再调用 skill2 CLI
+build      → 七个 Skill 符合 authoring 规范
+test       → 七个 Skill 各有隔离 case；整包有 routing case
+package    → Skill2 可预测、原子、可追溯安装
+publish    → README、版本、manifest、Release 一致
+audit      → 自扫无阻塞问题
+prune      → 自己可生成保守维护建议
+visualize  → 自己生成真实本地报告
 ```
 
-## 目标用户
+## Usage 方案
 
-已经使用 Codex、Claude Code、OpenCode、Cursor 或类似 coding agent 的人。
+### 0.1 主方案：Agent 日志适配器
 
-他们想在自己的仓库里沉淀可复用 skills，但缺少方法：
+读取本地 Agent session 日志，识别精确 `SKILL.md` 读取。分类：
 
-- 怎么写一个好 skill
-- 怎么测试它是否真的会触发
-- 怎么隔离测试，避免当前会话/全局配置污染
-- 怎么打包成别人好安装的开源 skill repo
-- 怎么检查规范、断链、危险脚本、机器本地路径
-- 怎么看哪些 skills 高频、低频、从未使用
-- 怎么合并、降级、项目化、删除旧 skills
+- `activation`：单个/少量 Skill 的精确读取；中等置信度调用信号。
+- `broad_scan`：同一 session 批量读取多个 Skills。
+- `maintenance`：编辑、复制、移动 Skill。
+- `worker_read`：Worker/Subagent 读取。
+- `unknown`：证据不足。
 
-## 最终形态
+默认只统计 `activation` 作为直接调用频率。其他分类保留，避免伪精确。
 
-```text
-skill2/
-  skills/
-    skill2-build/
-      SKILL.md
-      references/
-    skill2-test/
-      SKILL.md
-      references/
-    skill2-package/
-      SKILL.md
-      references/
-    skill2-publish/
-      SKILL.md
-      references/
-    skill2-audit/
-      SKILL.md
-      references/
-    skill2-prune/
-      SKILL.md
-      references/
+输出只含 Skill 名、时间、session 标识、分类、置信度、来源类型。不保留 prompt、transcript、绝对路径。不上传。
 
-  src/skill2/
-    cli.py
-    scaffold.py
-    scan.py
-    lint.py
-    test.py
-    usage.py
-    report.py
+### 为什么不直接读磁盘历史
 
-  docs/
-```
+- APFS 不保存“文件被打开次数”。
+- FSEvents 记录目录变更，不提供可靠读取事件。
+- macOS Endpoint Security/OpenBSM/`fs_usage` 只能监听启动后的读取；需额外权限，噪声高，跨平台差。
 
-## Skill 包
+结论：不能回溯磁盘读取次数。0.1 不做常驻监视器。
 
-### `skill2-build`
+### 后续可选：`skill2 usage watch`
 
-触发：用户想创建或改进一个 skill。
+实验能力。仅记录启动后的 Skill 文件读取：
 
-Agent 负责：
+- opt-in；默认关闭。
+- 本地聚合；不记录文件内容。
+- 明示平台、权限、漏报范围。
+- 与 Agent 日志事件去重。
 
-- 明确目标工作流
-- 判断该做顶层 skill、reference，还是项目级 skill
-- 写短而准的 `SKILL.md`
-- 只在必要时添加 `references/`、`scripts/`、`assets/`
-- 生成测试场景
-- 调用 `skill2 lint`
+只有能稳定区分 Agent 读取、编辑器预览、索引器扫描后才进入稳定接口。
 
-### `skill2-test`
+## Visualization
 
-触发：用户问“这个 skill 有没有效”“会不会触发”“怎么隔离测”。
+本地单文件 HTML。首版显示：
 
-Agent 负责：
+- Skill 库存、体积、最近修改。
+- 直接调用次数、最近调用时间、零调用候选。
+- broad scan / maintenance / worker read 噪声分布。
+- activation gap、false positive、测试通过率。
+- keep/merge/downgrade/projectize/delete candidate 建议及证据。
 
-- 构造正例、邻近正例、反例、压力场景
-- 用隔离环境只加载目标 skill
-- 检查是否触发
-- 检查不该触发时是否误触发
-- 检查输出是否满足断言
-- 解释失败原因
+低频不是删除结论。建议必须结合 owner、测试、项目边界、最近使用。
 
-CLI 支持：
+## 安装与发布
+
+README 只有一个主安装命令：
 
 ```bash
-skill2 test ./skills/foo --agent codex --cases cases/foo.yaml --isolate
+git clone https://github.com/MisterBrookT/skill2.git ~/.skill2 && ~/.skill2/install.sh
 ```
 
-### `skill2-package`
-
-触发：用户想把 skill repo 做成别人好安装的开源项目。
-
-Agent 负责：
-
-- 建立可分发 repo 结构
-- 检查跨 harness 兼容性
-- 检查是否有 secrets、绝对路径、大文件、坏链接
-- 生成 installer、plugin/marketplace metadata
-- 验证安装产物可复现
-
-CLI 支持：
-
-```bash
-skill2 scaffold skill-repo
-skill2 package-check . --json
-```
-
-### `skill2-publish`
-
-触发：用户想公开发布、release、改善 README，或验证别人能否安装一个 skill repo。
-
-Agent 负责：
-
-- 写英文主 README 与中文 README
-- 做品牌首屏、准确能力表、真实预览
-- 保留一个主安装命令
-- 配置 repo description、topics、license、changelog、release
-- 检查 README、manifest、installer、release 版本一致
-- 先输出 dry-run：版本、diff、artifact、目标、远端动作
-- tag、push、release、registry/marketplace 上传前获取用户显式确认
-- 在全新环境和公开 URL 上跑安装 smoke test
-- 只宣传已交付能力
-
-CLI 支持：
-
-```bash
-skill2 package-check . --json
-skill2 lint skills
-```
-
-### `skill2-audit`
-
-触发：用户想审计一个 skill library。
-
-Agent 负责：
-
-- 扫所有 skills
-- 找长 description
-- 找断链
-- 找重叠/冲突触发词
-- 找危险脚本
-- 找过大的 skill
-- 产出问题清单
-
-CLI 支持：
-
-```bash
-skill2 scan ./skills --json
-skill2 lint ./skills
-```
-
-### `skill2-prune`
-
-触发：用户想清理 skill library。
-
-Agent 负责：
-
-- 读取 usage/report
-- 找高频、低频、从未使用 skills
-- 识别“应合并”“应降级为 reference”“应项目化”“可删除”
-- 给理由和证据
-- 不自动删除，必须人确认
-
-CLI 支持：
-
-```bash
-skill2 usage --codex ~/.codex --json
-skill2 report --out report.html
-skill2 suggest --repo .
-```
-
-## CLI 职责
-
-CLI 不是主要产品界面。Skills 才是。
-
-CLI 只做确定性工作：
-
-- 生成文件脚手架
-- 校验 frontmatter/schema
-- 估算 token
-- 扫引用和断链
-- 扫危险脚本
-- 解析本地日志
-- 跑隔离测试
-- 生成静态 HTML 报告
-
-Agent 做判断：
-
-- 选 skill 范围
-- 解释测试结果
-- 决定合并/降级/项目化/删除建议
-- 改写 skill 文本
-- 说明取舍
-
-规则分层：
-
-- 官方格式错误：`ERROR`
-- 安全、可移植性、安装风险：`WARN`
-- 社区 authoring 实践：`ADVICE`
-- usage/test 推导的维护建议：`INSIGHT`
-
-## 安装故事
-
-### 用户安装
-
-安装 Skill2 skills：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/MisterBrookT/skill2/main/install.sh | bash -s -- codex
-```
-
-0.1 发布后可选安装 CLI：
-
-```bash
-uv tool install skill2
-```
-
-### Agent 使用
-
-安装后，用户可以说：
-
-```text
-帮我给这个 repo 写一个 skill
-测试这个 skill 是否会触发
-把这个 skill repo 做成别人好安装的开源仓库
-看看我的 skill library 哪些该删
-生成 skill 使用频率报告
-```
-
-Agent 触发 Skill2 skills；需要确定性检查时调用 CLI。
-
-## 开源 skill repo 标准
-
-推荐结构：
-
-```text
-README.md
-LICENSE
-CHANGELOG.md
-install.sh
-skills/
-  skill-name/
-    SKILL.md
-    references/
-    scripts/
-    assets/
-examples/
-cases/
-```
-
-检查项：
-
-- `SKILL.md` frontmatter 有效
-- `name` 和目录名一致
-- `description` 是短触发条件，不是工作流摘要
-- `references/` 引用存在
-- 需要执行的 scripts 有执行权限
-- install 能复制 skills 到目标 harness 路径
-- README 写清安装、使用、兼容性、隐私边界
-- 没有 secrets
-- 没有机器本地绝对路径
-- 没有无用大文件
-
-## 使用频率可视化
-
-目标：让人看出 skill library 是否符合真实使用。
-
-图表：
-
-- 每个 skill 调用次数
-- 最近使用时间
-- 从未使用 skills
-- 共现关系图
-- skill 体积 vs 使用频率
-- 隔离测试里的 activation gaps
-- 反例测试里的 false positives
-- 维护动作时间线
-
-报告形式：
-
-- 先做本地静态 HTML
-- 不做服务器
-- 不上传 telemetry
-
-## 隔离测试
-
-核心方法：
-
-```text
-目标 skill + 临时 skill root + 临时 home + 新会话 + 场景 prompt
-```
-
-测试分层：
-
-- 核心正例：应该触发
-- 邻近正例：应该触发
-- 反例：不该触发
-- 压力场景：容易误触发/漏触发
-- 输出断言：触发后结果是否对
-
-Codex first：
-
-- 读到隔离路径下的 `SKILL.md` = activation candidate
-- 如果 runtime 提供显式 activation event，则优先用显式事件
-- 输出断言和 activation 检测分开
-
-## 先例判断
-
-Tripwire 已证明 activation coverage 可测：场景矩阵、真实 agent session、检测 skill 是否触发、CI 重跑。
-
-Skill2 不应复制成另一个 CI-only linter。
-
-Skill2 要组合：
-
-- 给 agent 学的 skill 包
-- CLI 脚手架
-- 隔离测试
-- 开源打包规范
-- 本地使用记录分析
-- pruning dashboard
-
-## 实施顺序
-
-数据契约 → 真实 scan → Codex 隔离测试 → package/publish/audit → usage → report/suggest → 0.1 发布。
-
-详细阶段、依赖、验收见 [路线图](ROADMAP.md)。
-
-## 当前 repo 状态
-
-已转向 skills-first，正式分发源在：
-
-```text
-skills/
-```
-
-已建立：
-
-```text
-skills/skill2-test/SKILL.md
-skills/skill2-build/SKILL.md
-skills/skill2-package/SKILL.md
-skills/skill2-audit/SKILL.md
-skills/skill2-prune/SKILL.md
-```
-
-计划新增 `skills/skill2-publish/SKILL.md`。全部六个子 Skill 必须有单 Skill 隔离测试；整包另跑路由冲突测试。
-
-当前 CLI 已支持 `scaffold`、`lint`，`scan` 暂为 `lint` 别名。下一步按路线图 M0 执行。
+安装器必须支持：
+
+- `--dry-run`
+- 冲突预览
+- staging + 原子替换
+- 重复执行结果稳定
+- source/ref/tree SHA 记录
+- Codex/Claude 目标选择
+
+远端发布必须：dry-run → 用户确认 → tag/push/release/upload → 公开重装。
+
+## 0.1 边界
+
+- Codex-first 行为测试。
+- Agent Skills 兼容目录。
+- Python 3.11+ 辅助 CLI。
+- 本地 HTML；无 telemetry SaaS。
+- 不做 registry、marketplace、自动删除。
+- `watch` 仅研究项，不阻塞 0.1。

@@ -120,7 +120,7 @@ Run script when deterministic work is needed.
         self.assertEqual(result.returncode, 0, result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["schema_version"], "1")
-        self.assertEqual(len(payload["skills"]), 6)
+        self.assertEqual(len(payload["skills"]), 7)
         publish = next(skill for skill in payload["skills"] if skill["name"] == "skill2-publish")
         self.assertEqual(publish["scope"], "project")
         self.assertEqual(len(publish["hash"]), 64)
@@ -162,6 +162,57 @@ Read [guide](references/guide.md#top) before doing deterministic work.
         payload = json.loads(result.stdout)
         self.assertEqual(payload["version"], "2.1.0")
         self.assertEqual(payload["runs"][0]["tool"]["driver"]["name"], "skill2")
+
+    def test_scaffold_skill_repo_passes_package_check(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            scaffold = run_cli("scaffold", "skill-repo", "demo-repo", "-o", tmp)
+            self.assertEqual(scaffold.returncode, 0, scaffold.stderr)
+            result = run_cli("package-check", str(Path(tmp) / "demo-repo"), "--json")
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(json.loads(result.stdout)["issues"], [])
+
+    def test_visualize_renders_local_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            codex = root / ".codex"
+            codex.mkdir()
+            output = root / "report.html"
+
+            result = run_cli(
+                "visualize",
+                "--codex",
+                str(codex),
+                "--skills",
+                "skills",
+                "--tests",
+                str(root / "missing-tests"),
+                "--out",
+                str(output),
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue(output.is_file())
+            html = output.read_text(encoding="utf-8")
+            self.assertIn("Skill2 Report", html)
+            self.assertIn("Zero direct calls", html)
+
+    def test_suggest_emits_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            codex = Path(tmp) / ".codex"
+            codex.mkdir()
+            result = run_cli(
+                "suggest",
+                "--codex",
+                str(codex),
+                "--skills",
+                "skills",
+                "--tests",
+                str(Path(tmp) / "missing-tests"),
+                "--json",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["schema_version"], "1")
 
 
 if __name__ == "__main__":

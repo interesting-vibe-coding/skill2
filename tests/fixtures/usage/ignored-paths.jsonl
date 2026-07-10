@@ -1,0 +1,4 @@
+{"timestamp":"2026-07-04T00:00:00Z","type":"session_meta","payload":{"id":"ignored-1","source":"cli"}}
+{"timestamp":"2026-07-04T00:00:01Z","type":"response_item","payload":{"type":"function_call","name":"functions.exec","arguments":"{\"cmd\": \"cat __SKILL_ROOT__/plugins/cache/cached/SKILL.md\"}"}}
+{"timestamp":"2026-07-04T00:00:02Z","type":"response_item","payload":{"type":"function_call","name":"functions.exec","arguments":"{\"cmd\": \"cat __SKILL_ROOT__/vendor_imports/vendor/SKILL.md\"}"}}
+{"timestamp":"2026-07-04T00:00:03Z","type":"response_item","payload":{"type":"function_call","name":"functions.exec","arguments":"{\"cmd\": \"cat __SKILL_ROOT__/history/old/SKILL.md\"}"}}

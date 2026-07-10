@@ -1,71 +1,44 @@
 # AGENTS.md
 
-## Project
+## Product
 
-Skill2 = skills-first toolkit for building, testing, packaging, and maintaining agent skills.
+Skill2 = Superpowers-style Skill Library。七个 Skills 管理其他 Skill Library。Skills 是产品；Python CLI 是确定性脚手架。
 
-Goal: provide installable skills that teach other agents how to build/test/package/audit/prune skills. CLI supplies scaffolding, lint, isolated tests, usage parsing, and reports.
+## Invariants
 
-## Current State
+- `skills/<name>/SKILL.md` 单一行为来源。
+- `description` 写触发，不写流程摘要。
+- Agent 判断；CLI 做 scan/test/package/usage/report。
+- Usage 本地；不输出 prompt、transcript、绝对路径。
+- Suggest/Prune 只读。
+- Package 无远端副作用。
+- Publish 远端动作需 dry-run + 用户确认。
+- Skill2 必须符合自己教的规则。
 
-Docs-first repo. CLI not implemented.
-
-Start with:
-
-- `README.md`
-- `docs/MVP.md`
-- `docs/PRODUCT_DIRECTION.md`
-- `docs/SKILL_REPO_REFERENCES.md`
-- `docs/ARCHITECTURE.md`
-- `docs/PRIOR_ART.md`
-
-## First Implementation Target
-
-Build Python CLI with `uv`.
-
-Commands:
+## Verify
 
 ```bash
-skill2 scan <skills_dir> --json
-skill2 usage --codex ~/.codex --json
-skill2 test <skill_dir> --agent codex --cases <cases.yaml> --isolate
-skill2 report --scan scan.json --usage usage.json --out report.html
-skill2 suggest --repo <repo>
+PYTHONPATH=src uv run python -m unittest discover -s tests
+uv run ruff check .
+uv run skill2 lint skills
+uv run skill2 package-check .
 ```
 
-## Constraints
+真实测试：
 
-- Local-first.
-- No hosted telemetry.
-- Do not upload transcripts.
-- Treat usage events as approximate until confidence labels mature.
-- Do not auto-delete skills.
-- Isolated tests must not inherit user/global skills unless the case opts in.
-
-## Test Fixture
-
-Primary fixture:
-
-```text
-~/workspace/my-agent-config
+```bash
+skill2 test skills/<name> --cases cases/<name>.yaml --trials 3 --baseline
+skill2 test skills/skill2-build --cases cases/skill2-routing.yaml --pack --trials 3
 ```
 
-Expected first reproduced decision:
+长跑必须用 checkpoint/resume/early-stop。不要重跑已完成 trial。
 
-```text
-search-strategy + smart-fetch + internet-reach -> agent-search references
-```
+## Fixtures
 
-## Skill Test Protocol
+- 真实 dogfood：`~/workspace/my-agent-config/skills`
+- Test fixtures：`tests/fixtures/`
+- 运行证据：`.skill2/`；不提交。
 
-Project skills:
+## Release
 
-```text
-skills/skill2-test/SKILL.md
-skills/skill2-build/SKILL.md
-skills/skill2-package/SKILL.md
-skills/skill2-audit/SKILL.md
-skills/skill2-prune/SKILL.md
-```
-
-Use `skill2-test` before implementing `skill2 test`.
+先 `package-check`、`publish-check`、clean install。tag、push、GitHub Release、PyPI upload 前再次获取用户确认。

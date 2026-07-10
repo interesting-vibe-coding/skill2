@@ -1,0 +1,5 @@
+{"timestamp":"2026-07-03T00:00:00Z","type":"session_meta","payload":{"id":"broad-1","source":"cli","thread_source":"user"}}
+{"timestamp":"2026-07-03T00:00:01Z","type":"response_item","payload":{"type":"function_call","name":"functions.exec","arguments":"{\"cmd\": \"cat __SKILL_ROOT__/alpha/SKILL.md\"}"}}
+{"timestamp":"2026-07-03T00:00:02Z","type":"response_item","payload":{"type":"function_call","name":"functions.exec","arguments":"{\"cmd\": \"cat __SKILL_ROOT__/beta/SKILL.md\"}"}}
+{"timestamp":"2026-07-03T00:00:03Z","type":"response_item","payload":{"type":"function_call","name":"functions.exec","arguments":"{\"cmd\": \"cat __SKILL_ROOT__/gamma/SKILL.md\"}"}}
+{"timestamp":"2026-07-03T00:00:04Z","type":"response_item","payload":{"type":"function_call","name":"functions.exec","arguments":"{\"cmd\": \"cat __SKILL_ROOT__/delta/SKILL.md\"}"}}

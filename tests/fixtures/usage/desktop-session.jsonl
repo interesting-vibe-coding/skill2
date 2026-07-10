@@ -1,0 +1,7 @@
+{"timestamp":"2026-07-01T00:00:00Z","type":"session_meta","payload":{"id":"desktop-1","originator":"Codex Desktop","source":"cli","thread_source":"user"}}
+{"timestamp":"2026-07-01T00:00:00Z","type":"event_msg","payload":{"type":"user_message","text":"confidential prompt"}}
+{"timestamp":"2026-07-01T00:00:01Z","type":"response_item","payload":{"type":"function_call","name":"functions.exec","arguments":"{\"cmd\": \"sed -n '1,80p' __SKILL_ROOT__/alpha/SKILL.md\"}"}}
+{"timestamp":"2026-07-01T00:00:02Z","type":"response_item","payload":{"type":"function_call","name":"functions.exec","arguments":"{\"cmd\": \"sed -n '1,80p' __SKILL_ROOT__/alpha/SKILL.md\"}"}}
+{"timestamp":"2026-07-01T00:00:03Z","type":"response_item","payload":{"type":"function_call","name":"functions.apply_patch","arguments":"{\"patch\": \"*** Update File: __SKILL_ROOT__/beta/SKILL.md\"}"}}
+{"timestamp":"2026-07-01T00:00:04Z","type":"response_item","payload":{"type":"function_call","name":"functions.exec","arguments":"{\"cmd\": \"find __SKILL_ROOT__/gamma/SKILL.md -maxdepth 0\"}"}}
+{not valid json}
