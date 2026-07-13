@@ -7,7 +7,7 @@
 <p align="center"><strong>Skills for your skills.</strong></p>
 
 <p align="center">
-  An installable skill library that teaches agents to create, test, package, publish, audit, and visualize other skill libraries.
+  An installable skill library that teaches agents to create, test, package, publish, audit, and visualize your skills.
 </p>
 
 <p align="center"><a href="README.zh.md">中文</a></p>
@@ -25,7 +25,7 @@
 
 ## Install
 
-### Claude Code (primary)
+### Claude Code
 
 ```text
 /plugin marketplace add MisterBrookT/skill2
@@ -34,7 +34,7 @@
 
 Installs six self-contained Skills.
 
-### Codex (current)
+### Codex
 
 ```bash
 npx skills add MisterBrookT/skill2 -g -a codex -y
@@ -91,6 +91,8 @@ Skills are the product; deterministic scripts support them. The repository dogfo
 | Authoring | [Superpowers](https://github.com/obra/superpowers), [writing-skills](https://github.com/obra/superpowers/blob/main/skills/writing-skills/SKILL.md) | Skills-first structure, trigger-first descriptions, dogfood. |
 | Evaluation | [Superpowers evals](https://github.com/prime-radiant-inc/superpowers-evals), [Tripwire](https://github.com/bharath31/tripwire), [Waza](https://github.com/microsoft/waza), [skill-eval](https://github.com/fede0089/skill-eval), [agent-skills-eval](https://github.com/darkrishabh/agent-skills-eval), [skillci](https://github.com/tolztoy/skillci), [skill-distill](https://github.com/lov-alt/skill-distill) | Isolated runs, positive/negative routing, baseline, deterministic assertions. |
 | Packaging | [agent-scripts](https://github.com/steipete/agent-scripts), [awesome-copilot](https://github.com/github/awesome-copilot), [scientific-agent-skills](https://github.com/K-Dense-AI/scientific-agent-skills), [superpowers-marketplace](https://github.com/obra/superpowers-marketplace), [Caveman](https://github.com/JuliusBrussee/caveman), [OpenAI Plugins](https://github.com/openai/plugins) | Idempotent installs, conflict gates, marketplace manifests, CI. |
+
+Skill2 thanks these projects and their maintainers. Their work shaped this repository's architecture and design principles.
 
 See [design](docs/DESIGN.md) and [prior art](docs/PRIOR_ART.md).
 

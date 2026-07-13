@@ -12,8 +12,8 @@ create → test → package → publish
 
 ## 公开安装面
 
-1. **Claude Code（主入口）**：`/plugin marketplace add MisterBrookT/skill2` → `/plugin install skill2@skill2-marketplace`。
-2. **Codex（当前）**：`npx skills add MisterBrookT/skill2 -g -a codex -y`。Curated marketplace [审核中](https://github.com/openai/codex/issues/32820)；合并前不宣称 `/plugins` 可搜索到 Skill2。
+1. **Claude Code**：`/plugin marketplace add MisterBrookT/skill2` → `/plugin install skill2@skill2-marketplace`。
+2. **Codex**：`npx skills add MisterBrookT/skill2 -g -a codex -y`。Curated marketplace [审核中](https://github.com/openai/codex/issues/32820)；合并前不宣称 `/plugins` 可搜索到 Skill2。
 3. **手工 fallback**：`git clone` + `install.sh`，只复制 Skills。
 
 需要 [uv](https://docs.astral.sh/uv/) 仅当 Skill 执行其确定性脚本。无托管服务、telemetry、PyPI 用户安装路径。
@@ -130,7 +130,7 @@ docs/                    prior art 与设计依据
 
 采用：
 
-- README 只承诺已交付能力：Claude marketplace 主入口、Codex 当前 `npx skills add`、手工 fallback；兼容性、隐私与限制说清楚。
+- README 只承诺已交付能力：Claude marketplace、Codex `npx skills add`、手工 fallback；兼容性、隐私与限制说清楚。
 - 中英文安装命令字节级一致；不宣称尚未存在的 Codex `/plugins` 上架。
 - 发布前检查 package、tests、CI、working tree、version、changelog、artifact 与 checksum。
 - 公开安装 smoke：按 README 安装后，至少跑一个 Skill-owned command。
@@ -205,3 +205,7 @@ docs/                    prior art 与设计依据
 - 原独立生命周期 Skill 已并入 Visualize：触发重叠、共享证据管线，一条产品路径即可完成“看证据 + 保守 review”。
 
 完整调研与链接见 [PRIOR_ART.md](PRIOR_ART.md)。
+
+## 致谢
+
+感谢上述项目及其维护者。他们公开的规范、Skill、评测方法与分发实践，为 Skill2 的仓库架构和设计原则提供了重要基础。Skill2 借鉴其方法，不复制其实现；具体采用与取舍已在各节说明。
