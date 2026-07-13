@@ -1,15 +1,12 @@
 # Changelog
 
-## Unreleased
-
-- Marketplace-first install: six self-contained Skills with generated `scripts/run` + `_runtime/` bundles and package hash gate (`P2RT001`).
-- Public install surface: Claude marketplace primary, Codex `npx skills add`, manual `install.sh` Skills-only; README offline/uv-cache boundary.
-- Add `tools/smoke_install.py` clean-install smoke for `install.sh`, `npx skills add`, and Claude local marketplace; resumable checkpoints under `.skill2/install-smoke/`.
-- Add Codex curated marketplace metadata, privacy/terms pages, and Linux CI coverage for isolated fake runners.
-
-## 0.1.0 - 2026-07-13
+## 0.1.0 - 2026-07-14
 
 - Six-skill library: create, test, package, publish, audit, visualize.
+- Ship six self-contained Skills with generated `scripts/run` + `_runtime/` bundles and package hash gate (`P2RT001`).
+- Support Claude marketplace, Codex `npx skills add`, and manual Skills-only installation.
+- Add resumable clean-install smoke for all three public installation paths.
+- Add Codex plugin metadata, privacy/terms pages, and Linux CI coverage.
 - Merge lifecycle review into `skill2-visualize`; retire standalone prune skill.
 - Add scan/lint JSON and SARIF output.
 - Add isolated Codex/Claude activation and outcome testing, baseline, JUnit, checkpoint/resume, early-stop.

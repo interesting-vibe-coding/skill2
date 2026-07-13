@@ -40,7 +40,7 @@ Installs six self-contained Skills.
 npx skills add MisterBrookT/skill2 -g -a codex -y
 ```
 
-Copies the six self-contained Skills for Codex. A curated `/plugins` listing is [under review](https://github.com/openai/codex/issues/32820).
+Copies the six self-contained Skills for Codex.
 
 ### Manual fallback
 
