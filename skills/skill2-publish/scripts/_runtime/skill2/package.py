@@ -131,6 +131,8 @@ def scaffold_skill_repo(name: str, output_dir: Path) -> list[str]:
                 "name": name,
                 "version": "0.1.0",
                 "description": f"{name} skill repository.",
+                "homepage": f"https://github.com/example/{name}",
+                "repository": f"https://github.com/example/{name}",
                 "skills": "skills",
                 "license": "MIT",
             },
@@ -142,6 +144,8 @@ def scaffold_skill_repo(name: str, output_dir: Path) -> list[str]:
                 "name": name,
                 "version": "0.1.0",
                 "description": f"{name} skill repository.",
+                "homepage": f"https://github.com/example/{name}",
+                "repository": f"https://github.com/example/{name}",
                 "license": "MIT",
             },
             indent=2,
@@ -484,14 +488,36 @@ def _brand_graphic_issues(root: Path) -> list[Issue]:
 
 
 def _install_command_issues(root: Path) -> list[Issue]:
-    commands: set[str] = set()
+    by_file: dict[str, set[str]] = {}
     for relative in ("README.md", "README.zh.md"):
         text = _read_text(root / relative) or ""
-        commands.update(" ".join(match.split()) for match in _INSTALL_COMMAND_RE.findall(text))
-    if len(commands) == 1:
-        return []
-    message = "README files must show one primary install command"
-    return [Issue(Severity.ERROR, str(root / "README.md"), message, "P2P003")]
+        by_file[relative] = {
+            " ".join(match.split()) for match in _INSTALL_COMMAND_RE.findall(text)
+        }
+    english = by_file.get("README.md", set())
+    chinese = by_file.get("README.zh.md", set())
+    issues: list[Issue] = []
+    if english != chinese:
+        issues.append(
+            Issue(
+                Severity.ERROR,
+                str(root / "README.md"),
+                "README install commands must match between English and Chinese",
+                "P2P003",
+            )
+        )
+    # Package-manager install lines (pip/npm/curl|sh/git clone/install.sh) stay one set.
+    # Harness-native lines (/plugin, npx skills add) are not in this matcher.
+    if len(english) != 1:
+        issues.append(
+            Issue(
+                Severity.ERROR,
+                str(root / "README.md"),
+                "README files must show one primary install command",
+                "P2P003",
+            )
+        )
+    return issues
 
 
 def _version_consistency_issues(root: Path) -> list[Issue]:

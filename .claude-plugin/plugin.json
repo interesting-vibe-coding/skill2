@@ -2,6 +2,11 @@
   "name": "skill2",
   "version": "0.1.0",
   "description": "Skills for creating, testing, packaging, publishing, auditing, and visualizing skill libraries.",
+  "author": {
+    "name": "Yinghao Tang",
+    "url": "https://github.com/MisterBrookT"
+  },
+  "homepage": "https://github.com/MisterBrookT/skill2",
   "repository": "https://github.com/MisterBrookT/skill2",
   "license": "MIT"
 }

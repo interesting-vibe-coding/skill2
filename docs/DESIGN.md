@@ -2,7 +2,7 @@
 
 ## 定位
 
-Skill2 是可安装的 Skill Library。六个 Skills 管理其他 Skill Library；Python CLI 只提供确定性脚手架。
+Skill2 是可安装的 Skill Library。六个自包含 Skills 管理其他 Skill Library；顶层 Python CLI 只服务仓库开发、生成与验证，不是用户安装前提。
 
 ```text
 create → test → package → publish
@@ -10,11 +10,20 @@ create → test → package → publish
                     visualize
 ```
 
+## 公开安装面
+
+1. **Claude Code（主入口）**：`/plugin marketplace add MisterBrookT/skill2` → `/plugin install skill2@skill2-marketplace`。
+2. **Codex（当前）**：`npx skills add MisterBrookT/skill2 -g -a codex -y`。进入 curated marketplace 前，不宣称 `/plugins` 可搜索到 Skill2。
+3. **手工 fallback**：`git clone` + `install.sh`，只复制 Skills。
+
+用户不安装全局 `skill2` CLI。需要 [uv](https://docs.astral.sh/uv/) 仅当 Skill 执行其确定性脚本。无托管服务、telemetry、PyPI 用户安装路径。
+
 ## 仓库结构
 
 ```text
 skills/<name>/SKILL.md   Agent 行为；产品主体
-src/skill2/              scan、lint、test、usage、report
+skills/<name>/scripts/   Skill 自带确定性入口与 _runtime
+src/skill2/              canonical Python；贡献者/CI
 cases/*.yaml             扁平的机器测试输入
 tests/                   CLI 确定性测试
 docs/                    prior art 与设计依据
@@ -23,7 +32,7 @@ docs/                    prior art 与设计依据
 
 每个 Skill 使用独立目录，因为发现、安装、版本与资源归属都以 Skill 目录为单位。即使当前只有 `SKILL.md`，以后需要的 `references/`、`scripts/`、`assets/` 仍由同一 Skill 持有。没有资源时不创建空目录。
 
-可选 UI metadata 不默认生成。只在目标分发格式明确要求时添加。
+可选 UI metadata 不默认生成。只在目标分发格式明确要求时添加。author/homepage/repository 仅写入 schema 接受的 manifest 字段。
 
 ## 职责
 
@@ -98,8 +107,9 @@ docs/                    prior art 与设计依据
 采用：
 
 - 通用行为只放 `skills/`；harness metadata 由 adapter 生成，不复制多份 Skill 正文。
+- 有确定性工具的 Skill：候选物必须带 `scripts/` 与同步后的 `_runtime/`；脱离 checkout 仍可运行。
 - 安装前显示目标路径与计划写入；发现已有文件时阻止覆盖，除非用户显式 `--force`。
-- 重复安装结果可预测；同版本、同内容不制造额外状态。
+- 重复安装结果可预测；同版本、同内容不制造额外状态；`install.sh` 不安装全局 CLI。
 - 在临时 HOME 做 clean-install smoke，验证陌生机器路径，不依赖开发机缓存。
 - artifact 绑定 version 与 checksum，保证 Publish 操作的是同一候选物。
 
@@ -120,8 +130,10 @@ docs/                    prior art 与设计依据
 
 采用：
 
-- README 只承诺已交付能力，给陌生用户一个主安装路径、兼容性、隐私与限制。
+- README 只承诺已交付能力：Claude marketplace 主入口、Codex 当前 `npx skills add`、手工 fallback；兼容性、隐私与限制说清楚。
+- 中英文安装命令字节级一致；不宣称尚未存在的 Codex `/plugins` 上架。
 - 发布前检查 package、tests、CI、working tree、version、changelog、artifact 与 checksum。
+- 公开安装 smoke：按 README 安装后，至少跑一个 Skill-owned command。
 - 所有远端动作先输出精确 dry-run，再获得用户显式确认。
 - 发布后从公开 URL 重新安装，验证 README、manifest、installer 与 release 指向同一版本。
 
@@ -130,6 +142,7 @@ docs/                    prior art 与设计依据
 - Publish 不重做 package 内部；候选物失败时退回 Package。
 - 不把用户说“发布一下”解释成对所有 tag、push、registry 自动授权；远端动作逐项可见。
 - 支持发布到现有 registry/marketplace，但不在 Skill2 内自建 registry 服务。
+- 不提交 OpenAI curated marketplace，除非用户明确授权。
 
 ### `skill2-audit`
 

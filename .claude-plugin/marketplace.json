@@ -2,14 +2,19 @@
   "name": "skill2-marketplace",
   "description": "Skills for your skills.",
   "owner": {
-    "name": "MisterBrookT"
+    "name": "MisterBrookT",
+    "url": "https://github.com/MisterBrookT"
   },
   "plugins": [
     {
       "name": "skill2",
       "description": "Skills for creating, testing, packaging, publishing, auditing, and visualizing skill libraries.",
       "version": "0.1.0",
-      "source": "./"
+      "source": "./",
+      "author": {
+        "name": "Yinghao Tang",
+        "url": "https://github.com/MisterBrookT"
+      }
     }
   ]
 }

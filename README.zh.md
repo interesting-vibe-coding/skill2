@@ -25,21 +25,30 @@
 
 ## 安装
 
+### Claude Code（主入口）
+
+```text
+/plugin marketplace add MisterBrookT/skill2
+/plugin install skill2@skill2-marketplace
+```
+
+安装六个自包含 Skills。不安装全局 Skill2 CLI。
+
+### Codex（当前）
+
+```bash
+npx skills add MisterBrookT/skill2 -g -a codex -y
+```
+
+为 Codex 复制六个自包含 Skills。当前不宣称 Skill2 已进入 curated Codex `/plugins` 列表。
+
+### 手工 fallback
+
 ```bash
 git clone https://github.com/MisterBrookT/skill2.git ~/.skill2 && ~/.skill2/install.sh
 ```
 
-安装六个 Skill2 Skills 和辅助 CLI。依赖 Git 与 [uv](https://docs.astral.sh/uv/)。数据只留本地；无托管服务，无 telemetry。需要时可先检查 `~/.skill2/install.sh`。
-
-从 checkout 运行时，安装器还支持 `--dry-run`；发现冲突后必须显式 `--force`。
-
-Claude Code 安装到 `~/.claude/skills`：
-
-```bash
-~/.skill2/install.sh claude
-```
-
-`skill2 test --agent claude` 使用临时 `HOME` 与 `~/.claude/skills`。需要 API 配置时只复制 `~/.claude/settings.json`。
+只复制 Skills（从 checkout 运行时 `install.sh` 支持 `--dry-run` 与冲突门控的 `--force`）。需要 Git。[uv](https://docs.astral.sh/uv/) 仅在 Skill 执行其确定性脚本时需要。数据只留本地；无托管服务、无 telemetry、用户无需 PyPI 安装。
 
 ## Skill Library
 
@@ -64,42 +73,30 @@ Claude Code 安装到 `~/.claude/skills`：
 
 Skill2 从本地 Agent session 日志识别精确 `SKILL.md` 读取，区分直接调用、批量扫描、维护、Worker 读取。APFS 不保存历史文件打开次数，因此 Skill2 不声称掌握完整使用历史。
 
-直接在终端查看：
+确定性库存与使用视图通过已安装 Skill 自带脚本运行：
 
 ```bash
-skill2 visualize --skills ~/workspace/my-skill-library/skills --codex ~/.codex
+uv run --script <skill-dir>/scripts/run -- visualize --skills ~/workspace/my-skill-library/skills --codex ~/.codex
 ```
 
 需要结构化输入时使用 `--json`。低频是证据，不是删除结论。输出不包含 prompt 或 transcript。
 
-## 辅助 CLI
-
-Skills 在需要确定性结果时调用：
-
-```bash
-skill2 scaffold skill my-skill --description "Use when ..."
-skill2 scan skills --json
-skill2 lint skills --format sarif
-skill2 test skills/my-skill --cases cases/my-skill.yaml --baseline --trials 1
-skill2 package-check .
-skill2 publish-check .
-skill2 usage --skills skills --codex ~/.codex --json
-skill2 visualize --skills skills --codex ~/.codex
-```
-
 ## 设计
 
-Skill2 采用 Superpowers 型结构：Skills 是产品，CLI 是脚手架。仓库必须符合自己教的规则。Package 不发布。Publish 在 tag、push、Release、upload 前必须 dry-run 并获得明确确认。Visualize 不自动删除、移动或合并。
+Skill2 采用 Superpowers 型结构：Skills 是产品，顶层 CLI 是贡献者脚手架。仓库必须符合自己教的规则。Package 不发布。Publish 在 tag、push、Release、upload 前必须 dry-run 并获得明确确认。Visualize 不自动删除、移动或合并。
 
 详见[设计](docs/DESIGN.md)与[先例调研](docs/PRIOR_ART.md)。
 
 ## 开发
+
+贡献者与 CI 使用 checkout 内 CLI。这不是用户安装步骤：
 
 ```bash
 uv sync
 PYTHONPATH=src uv run python -m unittest discover -s tests
 uv run ruff check .
 uv run skill2 lint skills
+uv run skill2 package-check .
 ```
 
 MIT

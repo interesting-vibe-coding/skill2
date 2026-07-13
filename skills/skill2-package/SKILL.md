@@ -17,16 +17,19 @@ Produce a reviewable, reproducible install candidate without remote writes.
 
 Keep shared behavior in `skills/<name>/SKILL.md`. Add harness metadata only when a target format requires it. Include only resources used by installed skills.
 
+When a Skill ships deterministic tooling, the installed candidate must include that Skill's `scripts/` entrypoint and generated `_runtime/` (or equivalent self-contained resources). Detached install paths must not require repository `src/`, `.venv`, or a global `skill2` CLI.
+
 ## Gates
 
 - Every Skill passes format and repository lint.
 - References, scripts, and assets resolve.
 - Scripts are auditable and executable when required.
+- Skill-owned runtimes stay in sync with canonical source when the repo generates them.
 - Installer is explicit, repeatable, conflict-aware, and safe to preview.
 - Candidate contains no secrets, accidental local paths, or unrelated large files.
-- Clean temporary installation succeeds.
+- Clean temporary installation succeeds without a global helper CLI.
 - Version and checksum identify exact artifact.
-- README installation command, when present, targets candidate.
+- README installation commands, when present, target the candidate and stay equivalent across languages.
 
 ## Output
 

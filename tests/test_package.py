@@ -169,6 +169,44 @@ class PackageTest(unittest.TestCase):
             rules = {issue.rule_id for issue in result.issues}
             self.assertIn("P2P003", rules)
 
+    def test_public_readmes_native_install_surface(self) -> None:
+        english = (ROOT / "README.md").read_text(encoding="utf-8")
+        chinese = (ROOT / "README.zh.md").read_text(encoding="utf-8")
+        claude_commands = (
+            "/plugin marketplace add MisterBrookT/skill2",
+            "/plugin install skill2@skill2-marketplace",
+        )
+        codex_command = "npx skills add MisterBrookT/skill2 -g -a codex -y"
+        for text in (english, chinese):
+            for command in claude_commands:
+                self.assertIn(command, text)
+            self.assertIn(codex_command, text)
+            self.assertRegex(
+                text,
+                r"(?is)six self-contained skills|六个自包含\s*Skills",
+            )
+            self.assertNotRegex(
+                text,
+                r"(?is)(searchable|available|listed)\s+(in|via|under)\s+/plugins|"
+                r"/plugins\s+(marketplace\s+)?(lists?|includes?|has)\s+Skill2|"
+                r"Skill2\s+is\s+(searchable|listed)\s+in\s+/plugins|"
+                r"可在\s*/plugins\s*中搜索|已上架\s*/plugins|/plugins\s*可搜索",
+            )
+            self.assertNotRegex(
+                text,
+                r"(?is)installs?\s+six\s+Skill2\s+skills\s+and\s+the\s+helper\s+CLI|"
+                r"helper\s+CLI|"
+                r"安装六个\s*Skill2\s*Skills\s*和辅助\s*CLI|"
+                r"辅助\s*CLI",
+            )
+        for command in (*claude_commands, codex_command):
+            self.assertEqual(
+                english.count(command),
+                chinese.count(command),
+                f"install command must be byte-identical in both READMEs: {command}",
+            )
+            self.assertGreaterEqual(english.count(command), 1)
+
     @staticmethod
     def _commit(root: Path) -> None:
         for command in (

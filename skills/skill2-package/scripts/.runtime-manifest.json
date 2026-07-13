@@ -31,7 +31,7 @@
       "source": "src/skill2/models.py"
     },
     "skill2/package.py": {
-      "sha256": "f6ce376a36f7160fed05cd7445f99ecaebcd5495902503e52bbd4be53c23b4b8",
+      "sha256": "d1f8df799d47cc521a107ef11aa9188e4ac95c14f6469d714dc67dd677f0a8b4",
       "source": "src/skill2/package.py"
     },
     "skill2/scan.py": {
