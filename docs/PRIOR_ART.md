@@ -48,6 +48,8 @@ skill files + isolated tests + local usage
 | [awesome-copilot](https://github.com/github/awesome-copilot) | schema、PR gate、夜间扫描 | CI 分层、固定 Action SHA |
 | [scientific-agent-skills](https://github.com/K-Dense-AI/scientific-agent-skills) | 大型库、references/scripts、CI scan | 大库扫描、安全检查 |
 | [superpowers-marketplace](https://github.com/obra/superpowers-marketplace) | 薄 marketplace manifest | registry 与 skill 内容分离；Skill2 暂不做 registry |
+| [Caveman](https://github.com/JuliusBrussee/caveman) | Claude marketplace、Codex/npx、多 harness 安装 | 用户入口按 harness 原生习惯组织 |
+| [OpenAI Plugins](https://github.com/openai/plugins) | Codex curated marketplace 与 plugin manifest | Codex 插件候选物结构、marketplace metadata |
 
 ## 抽象规范
 

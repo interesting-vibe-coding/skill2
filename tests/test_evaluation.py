@@ -553,7 +553,13 @@ cases:
                 encoding="utf-8",
             )
             fake.chmod(0o755)
-            with patch.dict(os.environ, {"SKILL2_CLAUDE_BIN": str(fake)}):
+            with patch.dict(
+                os.environ,
+                {
+                    "SKILL2_CLAUDE_BIN": str(fake),
+                    "SKILL2_ALLOW_UNGUARDED": "1",
+                },
+            ):
                 result = run_claude(
                     prompt="Run demo.",
                     skill_dirs=(skill,),
@@ -575,7 +581,13 @@ cases:
             fake.write_text(_fake_claude_skill2_probe_script(), encoding="utf-8")
             fake.chmod(0o755)
             artifacts = root / "artifacts"
-            with patch.dict(os.environ, {"SKILL2_CLAUDE_BIN": str(fake)}):
+            with patch.dict(
+                os.environ,
+                {
+                    "SKILL2_CLAUDE_BIN": str(fake),
+                    "SKILL2_ALLOW_UNGUARDED": "1",
+                },
+            ):
                 result = run_claude(
                     prompt="Probe skill2 CLI.",
                     skill_dirs=(skill,),
@@ -603,6 +615,7 @@ cases:
                 {
                     "SKILL2_CODEX_BIN": str(fake),
                     "CODEX_HOME": str(host_codex),
+                    "SKILL2_ALLOW_UNGUARDED": "1",
                 },
             ):
                 result = run_codex(

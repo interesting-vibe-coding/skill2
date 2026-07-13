@@ -32,7 +32,7 @@
 /plugin install skill2@skill2-marketplace
 ```
 
-Installs six self-contained Skills. No global Skill2 CLI install.
+Installs six self-contained Skills.
 
 ### Codex (current)
 
@@ -83,7 +83,14 @@ Use `--json` for structured agent or script input. Low frequency is evidence, no
 
 ## Design
 
-Skill2 follows a Superpowers-style shape: skills are product; the top-level CLI is contributor scaffolding. The repository dogfoods every rule it teaches. Package never publishes. Publish requires dry-run and explicit confirmation before tag, push, release, or upload. Visualize never deletes, moves, or merges automatically.
+Skills are the product; deterministic scripts support them. The repository dogfoods every rule it teaches. Package never publishes. Publish requires dry-run and explicit confirmation. Visualize never changes a library.
+
+| Area | Prior art | Adopted |
+| --- | --- | --- |
+| Skill format | [Agent Skills spec](https://agentskills.io/specification), [Anthropic Skills](https://github.com/anthropics/skills) | Portable `SKILL.md`, progressive disclosure, owned resources. |
+| Authoring | [Superpowers](https://github.com/obra/superpowers), [writing-skills](https://github.com/obra/superpowers/blob/main/skills/writing-skills/SKILL.md) | Skills-first structure, trigger-first descriptions, dogfood. |
+| Evaluation | [Superpowers evals](https://github.com/prime-radiant-inc/superpowers-evals), [Tripwire](https://github.com/bharath31/tripwire), [Waza](https://github.com/microsoft/waza), [skill-eval](https://github.com/fede0089/skill-eval), [agent-skills-eval](https://github.com/darkrishabh/agent-skills-eval), [skillci](https://github.com/tolztoy/skillci), [skill-distill](https://github.com/lov-alt/skill-distill) | Isolated runs, positive/negative routing, baseline, deterministic assertions. |
+| Packaging | [agent-scripts](https://github.com/steipete/agent-scripts), [awesome-copilot](https://github.com/github/awesome-copilot), [scientific-agent-skills](https://github.com/K-Dense-AI/scientific-agent-skills), [superpowers-marketplace](https://github.com/obra/superpowers-marketplace), [Caveman](https://github.com/JuliusBrussee/caveman), [OpenAI Plugins](https://github.com/openai/plugins) | Idempotent installs, conflict gates, marketplace manifests, CI. |
 
 See [design](docs/DESIGN.md) and [prior art](docs/PRIOR_ART.md).
 

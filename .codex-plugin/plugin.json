@@ -9,5 +9,36 @@
   "homepage": "https://github.com/MisterBrookT/skill2",
   "repository": "https://github.com/MisterBrookT/skill2",
   "license": "MIT",
-  "skills": "skills"
+  "keywords": [
+    "agent-skills",
+    "skill-authoring",
+    "skill-testing",
+    "skill-governance",
+    "developer-tools"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Skill2",
+    "shortDescription": "Create, test, audit, package, publish, and visualize agent skills",
+    "longDescription": "A local-first skill library for creating, testing, auditing, packaging, publishing, and visualizing other agent skill libraries.",
+    "developerName": "Yinghao Tang",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/MisterBrookT/skill2",
+    "privacyPolicyURL": "https://github.com/MisterBrookT/skill2/blob/main/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/MisterBrookT/skill2/blob/main/TERMS.md",
+    "defaultPrompt": [
+      "Create a project-level skill for this workflow.",
+      "Test whether this skill activates and improves the result.",
+      "Visualize usage and test evidence for my skill library."
+    ],
+    "brandColor": "#0A0A0A",
+    "composerIcon": "./assets/icon.svg",
+    "logo": "./assets/icon.svg",
+    "screenshots": []
+  }
 }

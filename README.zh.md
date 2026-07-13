@@ -32,7 +32,7 @@
 /plugin install skill2@skill2-marketplace
 ```
 
-安装六个自包含 Skills。不安装全局 Skill2 CLI。
+安装六个自包含 Skills。
 
 ### Codex（当前）
 
@@ -83,7 +83,14 @@ uv run --script <skill-dir>/scripts/run -- visualize --skills ~/workspace/my-ski
 
 ## 设计
 
-Skill2 采用 Superpowers 型结构：Skills 是产品，顶层 CLI 是贡献者脚手架。仓库必须符合自己教的规则。Package 不发布。Publish 在 tag、push、Release、upload 前必须 dry-run 并获得明确确认。Visualize 不自动删除、移动或合并。
+Skills 是产品；确定性脚本为 Skills 提供支持。仓库必须符合自己教的规则。Package 不发布。Publish 的远端动作必须 dry-run 并获得明确确认。Visualize 不修改 Skill Library。
+
+| 方向 | 参考项目 | 采用内容 |
+| --- | --- | --- |
+| Skill 格式 | [Agent Skills spec](https://agentskills.io/specification)、[Anthropic Skills](https://github.com/anthropics/skills) | 可移植 `SKILL.md`、渐进加载、资源归属。 |
+| 创建方法 | [Superpowers](https://github.com/obra/superpowers)、[writing-skills](https://github.com/obra/superpowers/blob/main/skills/writing-skills/SKILL.md) | Skills-first、触发优先、dogfood。 |
+| 效果测试 | [Superpowers evals](https://github.com/prime-radiant-inc/superpowers-evals)、[Tripwire](https://github.com/bharath31/tripwire)、[Waza](https://github.com/microsoft/waza)、[skill-eval](https://github.com/fede0089/skill-eval)、[agent-skills-eval](https://github.com/darkrishabh/agent-skills-eval)、[skillci](https://github.com/tolztoy/skillci)、[skill-distill](https://github.com/lov-alt/skill-distill) | 隔离运行、正反路由、baseline、确定性断言。 |
+| 打包分发 | [agent-scripts](https://github.com/steipete/agent-scripts)、[awesome-copilot](https://github.com/github/awesome-copilot)、[scientific-agent-skills](https://github.com/K-Dense-AI/scientific-agent-skills)、[superpowers-marketplace](https://github.com/obra/superpowers-marketplace)、[Caveman](https://github.com/JuliusBrussee/caveman)、[OpenAI Plugins](https://github.com/openai/plugins) | 幂等安装、冲突门、marketplace manifest、CI。 |
 
 详见[设计](docs/DESIGN.md)与[先例调研](docs/PRIOR_ART.md)。
 
