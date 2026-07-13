@@ -136,7 +136,7 @@ def run_codex(
 
         manifest = {
             "runner": "codex",
-            "codex_version": _codex_version(),
+            "codex_version": _codex_version(codex_executable),
             "model": model,
             "timeout": timeout,
             "sandbox": sandbox_mode,
@@ -361,10 +361,10 @@ def _workspace_hashes(root: Path) -> dict[str, str]:
     return hashes
 
 
-@lru_cache(maxsize=1)
-def _codex_version() -> str:
+@lru_cache(maxsize=8)
+def _codex_version(executable: Path) -> str:
     completed = subprocess.run(
-        ["codex", "--version"],
+        [str(executable), "--version"],
         text=True,
         capture_output=True,
         check=False,

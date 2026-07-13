@@ -24,7 +24,7 @@
       "source": "src/skill2/cli.py"
     },
     "skill2/codex_runner.py": {
-      "sha256": "9fe1c142cdef46bdeb58f67f3fb861aafadc3e4bc7a627c9a17a1ac613fb2d6e",
+      "sha256": "b32ad36c9799fa2324499b4cc983a650e698a8ed20cec44a97eab07c60006729",
       "source": "src/skill2/codex_runner.py"
     },
     "skill2/models.py": {

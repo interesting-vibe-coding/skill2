@@ -545,10 +545,10 @@ cases:
                 "#!/bin/sh\n"
                 "set -eu\n"
                 "skill=$(find \"$HOME/.claude/skills\" -name SKILL.md | head -1)\n"
-                "printf '{\\\"type\\\":\\\"assistant\\\",\\\"message\\\":{\\\"content\\\":['\n"
-                "printf '{\\\"type\\\":\\\"tool_use\\\",\\\"name\\\":\\\"Read\\\",'\n"
-                "printf '\\\"input\\\":{\\\"file_path\\\":\\\"%s\\\"}}]}}\\n' \"$skill\"\n"
-                "printf '{\\\"type\\\":\\\"result\\\",\\\"result\\\":\\\"ready\\\"}\\n'\n"
+                "printf '{\"type\":\"assistant\",\"message\":{\"content\":['\n"
+                "printf '{\"type\":\"tool_use\",\"name\":\"Read\",'\n"
+                "printf '\"input\":{\"file_path\":\"%s\"}}]}}\\n' \"$skill\"\n"
+                "printf '{\"type\":\"result\",\"result\":\"ready\"}\\n'\n"
                 "printf ready > ready.txt\n",
                 encoding="utf-8",
             )
@@ -616,6 +616,7 @@ cases:
                     "SKILL2_CODEX_BIN": str(fake),
                     "CODEX_HOME": str(host_codex),
                     "SKILL2_ALLOW_UNGUARDED": "1",
+                    "PATH": "/usr/bin:/bin",
                 },
             ):
                 result = run_codex(
@@ -645,6 +646,10 @@ printf '{\\\"type\\\":\\\"result\\\",\\\"result\\\":\\\"skill2-ok\\\"}\\n'
 def _fake_codex_skill2_probe_script() -> str:
     return """#!/bin/sh
 set -eu
+if [ "${1:-}" = "--version" ]; then
+  printf 'codex-fake 0.0.0\n'
+  exit 0
+fi
 last=""
 prev=""
 for arg in "$@"; do
