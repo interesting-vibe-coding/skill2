@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/readme-icon.svg" width="88" alt="Skill2 图标">
+  <img src="docs/readme-icon-v2.svg" width="88" alt="Skill2 图标">
 </p>
 
 <h1 align="center">Skill2</h1>
