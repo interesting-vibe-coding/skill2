@@ -39,6 +39,26 @@ _TOKEN_RE = re.compile(
 _PROMPT_RE = re.compile(r"(?i)\bprompt\b\s*:?[^\n]*")
 _TRANSCRIPT_RE = re.compile(r"(?i)\btranscript\b[^\n]*")
 
+# Child smoke env: strip credential-like names. Values never logged.
+# Keep PATH/HOME/XDG/locale/SSL and other non-secret process essentials.
+_SENSITIVE_ENV_MARKERS = (
+    "API_KEY",
+    "TOKEN",
+    "SECRET",
+    "PASSWORD",
+    "CREDENTIAL",
+    "AUTHORIZATION",
+)
+# Provider/harness prefixes that may carry config without marker substrings.
+_SENSITIVE_ENV_PREFIXES = (
+    "ANTHROPIC_",
+    "OPENAI_",
+    "CLAUDE_",
+    "XAI_",
+    "SKILL2_CLAUDE_",
+    "SKILL2_CODEX_",
+)
+
 
 def build_npx_command(source: Path) -> list[str]:
     return ["npx", "--yes", "skills", "add", str(source), "-g", "-a", "codex", "-y"]
@@ -50,6 +70,38 @@ def build_claude_marketplace_add(source: Path) -> list[str]:
 
 def build_claude_plugin_install() -> list[str]:
     return ["claude", "plugin", "install", "skill2@skill2-marketplace"]
+
+
+def is_sensitive_env_name(name: str) -> bool:
+    """True if env name looks like credential or provider config."""
+    upper = name.upper()
+    if any(upper.startswith(prefix) for prefix in _SENSITIVE_ENV_PREFIXES):
+        return True
+    return any(marker in upper for marker in _SENSITIVE_ENV_MARKERS)
+
+
+def build_smoke_env(
+    home: Path,
+    *,
+    base: dict[str, str] | None = None,
+) -> dict[str, str]:
+    """Build child env for install/Skill scripts: strip auth, set HOME/XDG.
+
+    Keeps PATH, locale, SSL, proxy, and other non-secret process essentials.
+    Does not print or record values.
+    """
+    source = os.environ if base is None else base
+    env: dict[str, str] = {}
+    for key, value in source.items():
+        if key == "PYTHONPATH" or is_sensitive_env_name(key):
+            continue
+        env[key] = value
+    env["HOME"] = str(home)
+    # Avoid leaking real user config into tools that respect XDG.
+    env["XDG_CONFIG_HOME"] = str(home / ".config")
+    env["XDG_CACHE_HOME"] = str(home / ".cache")
+    env["XDG_DATA_HOME"] = str(home / ".local" / "share")
+    return env
 
 
 def sanitize_text(text: str, *paths: str) -> str:
@@ -471,13 +523,7 @@ def main(argv: list[str] | None = None) -> int:
             home.mkdir()
             source = base / "src"
             materialize_source(repo_root, source)
-            env = os.environ.copy()
-            env["HOME"] = str(home)
-            env.pop("PYTHONPATH", None)
-            # Avoid leaking real user config into tools that respect XDG.
-            env["XDG_CONFIG_HOME"] = str(home / ".config")
-            env["XDG_CACHE_HOME"] = str(home / ".cache")
-            env["XDG_DATA_HOME"] = str(home / ".local" / "share")
+            env = build_smoke_env(home)
             result = run_mode(
                 mode,
                 run_dir=run_dir,

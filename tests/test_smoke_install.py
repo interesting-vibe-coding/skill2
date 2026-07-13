@@ -269,6 +269,127 @@ class SmokeInstallUnitTest(unittest.TestCase):
             self.assertNotIn(REAL_HOME, blob)
             self.assertEqual(ck["status"], "completed")
 
+    def test_npx_install_failure_marks_failed(self) -> None:
+        smoke = load_smoke()
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            home = base / "home"
+            home.mkdir()
+            source = base / "src"
+            _materialize_minimal_source(source)
+            run_dir = base / "run"
+            run_dir.mkdir()
+            fake_bin = base / "bin"
+            write_exec(
+                fake_bin / "npx",
+                "#!/usr/bin/env bash\n"
+                "printf 'npx install boom\\n' >&2\n"
+                "exit 1\n",
+            )
+            env = smoke.build_smoke_env(home, base=os.environ.copy())
+            env["PATH"] = f"{fake_bin}{os.pathsep}{env.get('PATH', '')}"
+
+            result = smoke.run_mode(
+                "npx",
+                run_dir=run_dir,
+                repo_root=ROOT,
+                source_root=source,
+                home=home,
+                env=env,
+            )
+            self.assertEqual(result["status"], "failed", result)
+            self.assertTrue(result.get("error"))
+            self.assertIn("npx", result["error"].lower())
+            self.assertFalse(smoke.is_mode_complete(run_dir, "npx"))
+            ck = json.loads((run_dir / "npx.json").read_text(encoding="utf-8"))
+            self.assertEqual(ck["status"], "failed")
+            self.assertTrue(ck.get("error"))
+            self.assertNotIn(REAL_HOME, json.dumps(ck))
+
+    def test_npx_missing_skill_marks_failed(self) -> None:
+        smoke = load_smoke()
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            home = base / "home"
+            home.mkdir()
+            source = base / "src"
+            _materialize_minimal_source(source)
+            run_dir = base / "run"
+            run_dir.mkdir()
+            fake_bin = base / "bin"
+            write_exec(
+                fake_bin / "npx",
+                "#!/usr/bin/env bash\n"
+                "set -euo pipefail\n"
+                "source=\"\"\n"
+                "prev=\"\"\n"
+                "for a in \"$@\"; do\n"
+                "  if [ \"$prev\" = \"add\" ]; then source=\"$a\"; fi\n"
+                "  prev=\"$a\"\n"
+                "done\n"
+                "dest=\"$HOME/.agents/skills\"\n"
+                "mkdir -p \"$dest\"\n"
+                "cp -R \"$source\"/skills/* \"$dest/\"\n"
+                "rm -rf \"$dest/skill2-publish\"\n"
+                "printf 'Installed incomplete skill set\\n'\n",
+            )
+            env = smoke.build_smoke_env(home, base=os.environ.copy())
+            env["PATH"] = f"{fake_bin}{os.pathsep}{env.get('PATH', '')}"
+
+            result = smoke.run_mode(
+                "npx",
+                run_dir=run_dir,
+                repo_root=ROOT,
+                source_root=source,
+                home=home,
+                env=env,
+            )
+            self.assertEqual(result["status"], "failed", result)
+            err = (result.get("error") or "").lower()
+            self.assertIn("missing", err)
+            self.assertIn("skill2-publish", err)
+            self.assertFalse(smoke.is_mode_complete(run_dir, "npx"))
+            ck = json.loads((run_dir / "npx.json").read_text(encoding="utf-8"))
+            self.assertEqual(ck["status"], "failed")
+            self.assertTrue(ck.get("error"))
+
+    def test_build_smoke_env_strips_sensitive_names(self) -> None:
+        smoke = load_smoke()
+        dirty = {
+            "PATH": "/usr/bin:/bin",
+            "HOME": "/old-home",
+            "LANG": "C",
+            "LC_ALL": "C",
+            "SSL_CERT_FILE": "/etc/ssl/cert.pem",
+            "SSL_CERT_DIR": "/etc/ssl/certs",
+            "PYTHONPATH": "/should/not/pass",
+            "ANTHROPIC_API_KEY": "redacted-value",
+            "OPENAI_BASE_URL": "https://example.invalid",
+            "GITHUB_TOKEN": "redacted-value",
+            "MY_SECRET": "redacted-value",
+            "SKILL2_CLAUDE_BIN": "/fake/claude",
+        }
+        home = Path("/tmp/skill2-smoke-env-home")
+        clean = smoke.build_smoke_env(home, base=dirty)
+        for name in (
+            "ANTHROPIC_API_KEY",
+            "OPENAI_BASE_URL",
+            "GITHUB_TOKEN",
+            "MY_SECRET",
+            "SKILL2_CLAUDE_BIN",
+            "PYTHONPATH",
+        ):
+            self.assertNotIn(name, clean)
+        self.assertEqual(clean.get("PATH"), dirty["PATH"])
+        self.assertEqual(clean.get("HOME"), str(home))
+        self.assertEqual(clean.get("LANG"), "C")
+        self.assertEqual(clean.get("LC_ALL"), "C")
+        self.assertEqual(clean.get("SSL_CERT_FILE"), dirty["SSL_CERT_FILE"])
+        self.assertEqual(clean.get("SSL_CERT_DIR"), dirty["SSL_CERT_DIR"])
+        self.assertEqual(clean.get("XDG_CONFIG_HOME"), str(home / ".config"))
+        self.assertEqual(clean.get("XDG_CACHE_HOME"), str(home / ".cache"))
+        self.assertEqual(clean.get("XDG_DATA_HOME"), str(home / ".local" / "share"))
+
 
 def _materialize_minimal_source(dest: Path) -> None:
     """Copy six skills + manifests; enough for install-sh / fake npx / fake claude."""
