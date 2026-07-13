@@ -47,6 +47,14 @@ When uncertain, prefer `references/` or project-local placement over expanding t
 Create only needed directories. Keep references one hop from `SKILL.md`. Do not nest discoverable skills.
 Do not create optional metadata unless the target repository or distribution format requires it.
 
+## Commands
+
+Skill-owned scaffold:
+
+```bash
+uv run --script <skill-dir>/scripts/run -- scaffold skill <name>
+```
+
 ## Library decisions
 
 - Split when users invoke workflows independently or ownership diverges

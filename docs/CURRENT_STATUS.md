@@ -23,9 +23,9 @@ Skill2 = 六个自包含 Skills（create / test / package / publish / audit / vi
 
 | mode | run-id | 结果 | 验收 |
 | --- | --- | --- | --- |
-| `install-sh` | `20260713T133517Z-39708f2a` | completed | 六 Skills 装入 temp HOME；detach 后 `skill2-create/scripts/run` scaffold 成功 |
-| `npx` | `20260713T133520Z-6a24dca4` | completed | 六 Skills → Codex `~/.agents/skills`；detach 后 `skill2-visualize/scripts/run` 出终端 inventory |
-| `claude` | `20260713T133524Z-6395eaad` | completed | 本地 marketplace add + `skill2@skill2-marketplace` install；detach 后 Skill-owned scaffold 成功；无 model/API |
+| `install-sh` | `20260713T144259Z-b65daadb` | completed | 六 Skills 装入 temp HOME；detach 后 `skill2-create/scripts/run` scaffold 成功 |
+| `npx` | `20260713T144259Z-f544539c` | completed | 六 Skills → Codex `~/.agents/skills`；detach 后 `skill2-visualize/scripts/run` 出终端 inventory |
+| `claude` | `20260713T144259Z-317da1ea` | completed | 本地 marketplace add + `skill2@skill2-marketplace` install；detach 后 Skill-owned scaffold 成功；无 model/API |
 
 Checkpoint 目录：`.skill2/install-smoke/<run-id>/`（gitignore）。manifest 不含真实 HOME / prompt / transcript / token。
 

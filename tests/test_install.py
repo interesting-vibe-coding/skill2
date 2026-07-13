@@ -136,6 +136,18 @@ class InstallScriptTest(unittest.TestCase):
             "skill docs must show uv run --script <skill-dir>/scripts/run -- <command>",
         )
 
+    def test_create_skill_documents_local_scaffold_command(self) -> None:
+        text = (ROOT / "skills" / "skill2-create" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertRegex(
+            text,
+            r"uv run --script <skill-dir>/scripts/run -- scaffold skill\b",
+            "skill2-create must document Skill-owned scaffold entrypoint",
+        )
+        self.assertIsNone(
+            BARE_SKILL2_CMD.search(text),
+            "skill2-create must not document bare global skill2 commands",
+        )
+
     def test_codex_installs_lists_statuses_and_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             home = Path(tmp)

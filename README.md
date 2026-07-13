@@ -48,7 +48,7 @@ Copies the six self-contained Skills for Codex. Skill2 is not claimed as a curat
 git clone https://github.com/MisterBrookT/skill2.git ~/.skill2 && ~/.skill2/install.sh
 ```
 
-Copies Skills only (`install.sh` supports `--dry-run` and conflict-gated `--force` from a checkout). Requires Git. [uv](https://docs.astral.sh/uv/) is needed only when a Skill runs its deterministic script. Data stays local; no hosted service, telemetry, or PyPI install for users.
+Copies Skills only (`install.sh` supports `--dry-run` and conflict-gated `--force` from a checkout). Requires Git. [uv](https://docs.astral.sh/uv/) is needed only when a Skill runs its deterministic script. Skill scripts use `uv run --script`; first run may fetch declared dependencies into the uv cache; offline use requires a warm cache. Data stays local; no hosted service, telemetry, or PyPI install for users.
 
 ## Skill Library
 

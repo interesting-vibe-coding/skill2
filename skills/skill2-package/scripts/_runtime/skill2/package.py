@@ -427,7 +427,7 @@ def _runtime_integrity_issues(root: Path) -> list[Issue]:
                 Severity.ERROR,
                 str(root / relative),
                 f"stale or missing skill runtime: {relative}",
-                "P2R001",
+                "P2RT001",
             )
         )
     return issues
@@ -513,7 +513,7 @@ def _install_command_issues(root: Path) -> list[Issue]:
             Issue(
                 Severity.ERROR,
                 str(root / "README.md"),
-                "README files must show one primary install command",
+                "README must show one matching package-manager/manual fallback install command",
                 "P2P003",
             )
         )

@@ -48,7 +48,7 @@ npx skills add MisterBrookT/skill2 -g -a codex -y
 git clone https://github.com/MisterBrookT/skill2.git ~/.skill2 && ~/.skill2/install.sh
 ```
 
-只复制 Skills（从 checkout 运行时 `install.sh` 支持 `--dry-run` 与冲突门控的 `--force`）。需要 Git。[uv](https://docs.astral.sh/uv/) 仅在 Skill 执行其确定性脚本时需要。数据只留本地；无托管服务、无 telemetry、用户无需 PyPI 安装。
+只复制 Skills（从 checkout 运行时 `install.sh` 支持 `--dry-run` 与冲突门控的 `--force`）。需要 Git。[uv](https://docs.astral.sh/uv/) 仅在 Skill 执行其确定性脚本时需要。Skill 脚本使用 `uv run --script`；首次运行可能将声明依赖拉取进 uv cache；离线使用需要已预热的 cache。数据只留本地；无托管服务、无 telemetry、用户无需 PyPI 安装。
 
 ## Skill Library
 

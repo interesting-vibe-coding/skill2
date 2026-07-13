@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -70,9 +71,13 @@ class PackageTest(unittest.TestCase):
             runtime_errors = [
                 issue
                 for issue in result.issues
-                if issue.rule_id == "P2R001" and "runtime" in issue.message
+                if issue.rule_id == "P2RT001" and "runtime" in issue.message
             ]
             self.assertTrue(runtime_errors, result.to_dict())
+            self.assertFalse(
+                any(issue.rule_id == "P2R001" for issue in runtime_errors),
+                "runtime integrity must not reuse repo-structure P2R001",
+            )
             joined = " ".join(issue.path for issue in runtime_errors)
             self.assertTrue(
                 "skill2-create" in joined or "runtime-manifest" in joined,
@@ -90,9 +95,10 @@ class PackageTest(unittest.TestCase):
             runtime_errors = [
                 issue
                 for issue in result.issues
-                if issue.rule_id == "P2R001" and "runtime" in issue.message
+                if issue.rule_id == "P2RT001" and "runtime" in issue.message
             ]
             self.assertTrue(runtime_errors, result.to_dict())
+            self.assertNotIn("P2R001", {issue.rule_id for issue in runtime_errors})
             joined = " ".join(f"{issue.path} {issue.message}" for issue in runtime_errors)
             self.assertIn("skill2-create", joined)
             self.assertTrue("run" in joined or "scripts" in joined, joined)
@@ -177,6 +183,10 @@ class PackageTest(unittest.TestCase):
             "/plugin install skill2@skill2-marketplace",
         )
         codex_command = "npx skills add MisterBrookT/skill2 -g -a codex -y"
+        offline_boundary = re.compile(
+            r"(?is)uv run --script.*first run.*uv cache|uv run --script.*首次.*uv cache|"
+            r"offline.*warm cache|离线.*预热|离线.*已有.*cache",
+        )
         for text in (english, chinese):
             for command in claude_commands:
                 self.assertIn(command, text)
@@ -184,6 +194,11 @@ class PackageTest(unittest.TestCase):
             self.assertRegex(
                 text,
                 r"(?is)six self-contained skills|六个自包含\s*Skills",
+            )
+            self.assertRegex(
+                text,
+                offline_boundary,
+                "README must state uv run --script + first-run cache / offline warm-cache boundary",
             )
             self.assertNotRegex(
                 text,
