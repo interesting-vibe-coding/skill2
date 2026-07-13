@@ -13,7 +13,7 @@ create → test → package → publish
 ## 公开安装面
 
 1. **Claude Code（主入口）**：`/plugin marketplace add MisterBrookT/skill2` → `/plugin install skill2@skill2-marketplace`。
-2. **Codex（当前）**：`npx skills add MisterBrookT/skill2 -g -a codex -y`。进入 curated marketplace 前，不宣称 `/plugins` 可搜索到 Skill2。
+2. **Codex（当前）**：`npx skills add MisterBrookT/skill2 -g -a codex -y`。Curated marketplace [审核中](https://github.com/openai/codex/issues/32820)；合并前不宣称 `/plugins` 可搜索到 Skill2。
 3. **手工 fallback**：`git clone` + `install.sh`，只复制 Skills。
 
 需要 [uv](https://docs.astral.sh/uv/) 仅当 Skill 执行其确定性脚本。无托管服务、telemetry、PyPI 用户安装路径。

@@ -40,7 +40,7 @@
 npx skills add MisterBrookT/skill2 -g -a codex -y
 ```
 
-为 Codex 复制六个自包含 Skills。当前不宣称 Skill2 已进入 curated Codex `/plugins` 列表。
+为 Codex 复制六个自包含 Skills。Curated `/plugins` 上架申请[正在审核](https://github.com/openai/codex/issues/32820)。
 
 ### 手工 fallback
 
