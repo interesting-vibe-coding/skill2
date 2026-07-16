@@ -7,7 +7,8 @@
 <p align="center"><strong>给 Skills 的 Skills。</strong></p>
 
 <p align="center">
-  一个可安装的 Skill Library，教 Agent 创建、测试、打包、发布、审计和可视化你的 Skills。
+  发布 Agent Skills 前完成测试与审计。在本地发现触发问题、证据不足与打包缺陷。<br>
+  可视化整个 Skill Library 的使用情况与测试状态，并找出有证据支持的清理候选项。
 </p>
 
 <p align="center"><a href="README.md">English</a></p>

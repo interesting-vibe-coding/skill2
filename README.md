@@ -7,7 +7,8 @@
 <p align="center"><strong>Skills for your skills.</strong></p>
 
 <p align="center">
-  An installable skill library that teaches agents to create, test, package, publish, audit, and visualize your skills.
+  Test and audit Agent Skills before shipping. Catch bad triggers, weak evidence, and packaging defects—locally.<br>
+  Visualize usage and test status across your library, then surface evidence-backed cleanup candidates.
 </p>
 
 <p align="center"><a href="README.zh.md">中文</a></p>

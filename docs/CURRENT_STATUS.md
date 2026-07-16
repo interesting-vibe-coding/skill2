@@ -1,6 +1,6 @@
 # 当前状态
 
-> 更新：2026-07-14（0.1.1：合并 package / publish）
+> 更新：2026-07-16（0.1.1：发布候选验证完成）
 
 ## 产品
 
@@ -17,17 +17,17 @@ Skill2 = 五个自包含 Skills（create / test / package / audit / visualize）
 
 `uv`：仅当 Skill 执行确定性脚本时需要。无托管服务、telemetry、PyPI 用户安装前提。
 
-## Clean-install smoke 证据（0.1.0 历史）
+## Clean-install smoke 证据（0.1.1）
 
-下表记录合并前的六 Skill 拓扑；不能替代 0.1.1 五 Skill 候选物的 install smoke。
+下表验证合并后的五 Skill 拓扑。
 
 工具：`tools/smoke_install.py`（`--mode install-sh|npx|claude|all`，checkpoint 可 `--resume`）。
 
 | mode | run-id | 结果 | 验收 |
 | --- | --- | --- | --- |
-| `install-sh` | `20260713T144259Z-b65daadb` | completed | 六 Skills 装入 temp HOME；detach 后 `skill2-create/scripts/run` scaffold 成功 |
-| `npx` | `20260713T144259Z-f544539c` | completed | 六 Skills → Codex `~/.agents/skills`；detach 后 `skill2-visualize/scripts/run` 出终端 inventory |
-| `claude` | `20260713T144259Z-317da1ea` | completed | 本地 marketplace add + `skill2@skill2-marketplace` install；detach 后 Skill-owned scaffold 成功；无 model/API |
+| `install-sh` | `20260716-readme-release` | completed | 五 Skills 装入 temp HOME；detach 后 `skill2-create/scripts/run` scaffold 成功 |
+| `npx` | `20260716-readme-release` | completed | 五 Skills → Codex `~/.agents/skills`；detach 后 `skill2-visualize/scripts/run` 出终端 inventory |
+| `claude` | `20260716-readme-release` | completed | 本地 marketplace add + `skill2@skill2-marketplace` install；detach 后 Skill-owned scaffold 成功；无 model/API |
 
 Checkpoint 目录：`.skill2/install-smoke/<run-id>/`（gitignore）。manifest 不含真实 HOME / prompt / transcript / token。
 
@@ -43,7 +43,7 @@ Checkpoint 目录：`.skill2/install-smoke/<run-id>/`（gitignore）。manifest 
 ## 未完成 / 外部条件
 
 - Codex curated marketplace **未提交**；上架前 README 保持 `npx skills add`，不宣称 `/plugins` 可搜到 Skill2。
-- 未做 tag、GitHub Release、PyPI upload、marketplace 远端提交。
+- PyPI upload 与其他 marketplace 远端提交不属于当前 native release。
 
 ## 版本
 
