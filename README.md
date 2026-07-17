@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>Skills for your skills.</strong><br>
-  Full-lifecycle management for Agent Skill libraries.
+  <strong>Full-lifecycle management for Agent Skill libraries.</strong>
 </p>
 
 <p align="center">

@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>给 Skills 的 Skills。</strong><br>
-  Agent Skill Library 全生命周期管理。
+  <strong>Agent Skill Library 全生命周期管理。</strong>
 </p>
 
 <p align="center">
